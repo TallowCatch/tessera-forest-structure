@@ -1,0 +1,23 @@
+study:
+  sites: 20
+  support_m: 50
+  question: absolute transfer, rank transfer, and sparse local reference support
+targets:
+  - p95_height
+  - return_height_sd
+  - return_height_cv
+  - return_height_entropy
+  - pulse_penetration
+  - sigma_z
+reference_budgets: [0, 2, 5, 10, 25, 50, 100, 200]
+finite_budget_repetitions: 10
+sampling_seed: 20260916
+methods:
+  - source_ridge
+  - source_offset_correction
+  - target_only_ridge
+  - source_plus_target_ridge
+evaluation:
+  exact_values: [rmse, r2]
+  relative_pattern: [unit_spearman, spatial_block_spearman]
+  target_test_labels_used_for_fitting: false

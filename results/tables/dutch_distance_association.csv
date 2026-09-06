@@ -1,0 +1,8 @@
+statistic,value
+directed_pairs,380.0
+mean_relative_rmse_same_group,1.6209180484600627
+mean_relative_rmse_different_group,2.3114115900366916
+spearman_distance_relative_rmse,0.14743643506797294
+ols_log_distance_coefficient,0.1713734685304945
+ols_same_group_coefficient,-0.6933389390147605
+ols_r2,0.1897819960092293

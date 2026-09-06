@@ -1,0 +1,77 @@
+study:
+  name: Dutch multi-forest structure transfer
+  country: the Netherlands
+  analysis_crs: EPSG:28992
+  lidar_campaign: AHN4
+  site_source: data/external/ahn4_selection/Nature2000_NL_RDnew.shp
+  sites: 20
+  conifer_dominated_sites: 10
+  broadleaf_dominated_sites: 10
+  eligible_units: 38297
+  support_m: 50
+selection:
+  target_sites_per_group: 10
+  minimum_sites_per_group: 6
+  minimum_tree_fraction: 0.80
+  minimum_group_fraction_among_trees: 0.80
+  minimum_units_per_site: 250
+  maximum_units_per_site: 5000
+  minimum_centroid_distance_km: 12
+  anchors:
+    - {name: Veluwe, code: veluwe, group: conifer}
+    - {name: Sallandse Heuvelrug, code: sallandse_heuvelrug, group: conifer}
+    - {name: Schoorlse Duinen, code: schoorlse_duinen, group: conifer}
+    - {name: Savelsbos, code: savelsbos, group: broadleaf}
+    - {name: Landgoederen Oldenzaal, code: landgoederen_oldenzaal, group: broadleaf}
+    - {name: Drentsche Aa-gebied, code: drentsche_aa, group: broadleaf}
+genus_map:
+  record: https://zenodo.org/records/13341104
+  grid: data/external/forestpaths_tree_genus/grid.gpkg
+  tile_directory: data/external/forestpaths_tree_genus/tiles
+  conifer_classes: [0, 1, 2, 5]
+  broadleaf_classes: [3, 4, 6]
+  minimum_tree_fraction: 0.80
+  minimum_group_fraction_among_trees: 0.80
+ahn4:
+  record: https://zenodo.org/records/8422129
+  flighttime: data/raw/ahn4/ahn4_10m_flighttime.tif
+  masks:
+    - data/raw/ahn4/ahn4_10m_mask_building_road_water.tif
+    - data/raw/ahn4/ahn4_10m_mask_powerline.tif
+    - data/raw/ahn4/ahn4_10m_NA_mask.tif
+  metrics:
+    ahn4_mean_height_m: data/raw/ahn4/ahn4_10m_mean_normalized_height.tif
+    ahn4_p95_height_m: data/raw/ahn4/ahn4_10m_perc_95_normalized_height.tif
+    ahn4_height_sd_m: data/raw/ahn4/ahn4_10m_std_normalized_height.tif
+    ahn4_height_cv: data/raw/ahn4/ahn4_10m_coeff_var_normalized_height.tif
+    ahn4_entropy: data/raw/ahn4/ahn4_10m_entropy_normalized_height.tif
+    ahn4_pulse_penetration: data/raw/ahn4/ahn4_10m_pulse_penetration_ratio.tif
+    ahn4_sigma_z: data/raw/ahn4/ahn4_10m_sigma_z.tif
+population:
+  lidar_cell_m: 10
+  output_support_m: 50
+  minimum_valid_lidar_fraction: 0.95
+  minimum_mean_height_m: 10.0
+  maximum_pulse_penetration: 0.50
+  minimum_single_year_fraction: 0.95
+  minimum_rows_per_site: 250
+  maximum_rows_per_site: 5000
+  sampling_block_m: 1000
+  sampling_seed: 20260902
+tessera:
+  representation: public_v1.0_vultr
+  dimensions: 128
+  minimum_valid_pixels: 20
+targets:
+  canopy_height_and_dispersion: [p95_height, return_height_sd, return_height_cv]
+  return_profile: [return_height_entropy, pulse_penetration, sigma_z]
+validation:
+  spatial_folds: 5
+  fold_block_m: 500
+  train_test_exclusion_m: 500
+  fold_seed: 20260831
+  bootstrap_replicates: 2000
+comparisons: [local, same_forest_group, opposite_forest_group, all_other_sites]
+model:
+  family: ridge
+  alpha: 100.0

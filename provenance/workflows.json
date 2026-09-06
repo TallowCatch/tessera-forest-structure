@@ -1,0 +1,113 @@
+{
+  "schema_version": 3,
+  "workflows": [
+    {
+      "id": "cairngorms-local",
+      "title": "Cairngorms local spatial prediction",
+      "summary": "Buffered evaluation of canopy-surface and return-profile measurements.",
+      "readme": "workflows/cairngorms_local/README.md",
+      "parameters": "workflows/cairngorms_local/parameters.yaml",
+      "inputs": [
+        {"name": "Cairngorms surface targets", "path": "data/processed/cairngorms_surface_targets.parquet", "access": "derived from collaborator-supplied LiDAR"},
+        {"name": "Cairngorms Tessera patches", "path": "data/interim/cairngorms_embedding_patches", "access": "authorised Tessera release"},
+        {"name": "spatial fold definitions", "path": "data/interim/cairngorms_spatial_folds", "access": "generated"}
+      ],
+      "outputs": [
+        "results/tables/cairngorms_performance.csv",
+        "results/tables/cairngorms_model_comparison.csv",
+        "results/figures/main/fig03_cairngorms_core_predictions.pdf",
+        "results/figures/main/fig04_height_adjustment.pdf"
+      ]
+    },
+    {
+      "id": "savelsbos-local",
+      "title": "Savelsbos local broadleaf replication",
+      "summary": "Local spatial evaluation using AHN4 return-height measurements.",
+      "readme": "workflows/savelsbos_local/README.md",
+      "parameters": "workflows/savelsbos_local/parameters.yaml",
+      "inputs": [
+        {"name": "Savelsbos AHN4 cohort", "path": "data/processed/savelsbos_targets.parquet", "access": "generated from public AHN4"},
+        {"name": "Savelsbos Tessera features", "path": "data/processed/savelsbos_tessera_features.parquet", "access": "authorised Tessera release"},
+        {"name": "spatial fold definitions", "path": "data/interim/savelsbos_spatial_folds", "access": "generated"}
+      ],
+      "outputs": [
+        "results/tables/savelsbos_local_performance.csv"
+      ]
+    },
+    {
+      "id": "cross-landscape",
+      "title": "Scotland-Netherlands transfer and joint training",
+      "summary": "Direct transfer and pooled modelling across contrasting landscapes.",
+      "readme": "workflows/cross_landscape/README.md",
+      "parameters": "workflows/cross_landscape/parameters.yaml",
+      "inputs": [
+        {"name": "Cairngorms harmonised targets", "path": "data/processed/cairngorms_harmonised_targets.parquet", "access": "derived from collaborator-supplied LiDAR"},
+        {"name": "Cairngorms feature summaries", "path": "data/interim/cairngorms_feature_summaries.npy", "access": "generated from authorised Tessera release"},
+        {"name": "Savelsbos feature summaries", "path": "data/processed/savelsbos_tessera_features.parquet", "access": "authorised Tessera release"}
+      ],
+      "outputs": [
+        "results/tables/cross_landscape_transfer.csv",
+        "results/tables/joint_landscape_model.csv",
+        "results/figures/diagnostics/cross_landscape_transfer.png",
+        "results/figures/diagnostics/joint_landscape_model.png"
+      ]
+    },
+    {
+      "id": "dutch-multiforest",
+      "title": "Twenty-forest Dutch transfer",
+      "summary": "Local, within-group, between-group, and all-other-site transfer across 20 forests.",
+      "readme": "workflows/dutch_multiforest/README.md",
+      "parameters": "workflows/dutch_multiforest/parameters.yaml",
+      "inputs": [
+        {"name": "Dutch 20-forest cohort", "path": "data/processed/dutch_multiforest_cohort.parquet", "access": "generated from public AHN4 and forest maps"},
+        {"name": "Dutch Tessera features", "path": "data/processed/dutch_multiforest_tessera_features.parquet", "access": "public Tessera v1 release"},
+        {"name": "spatial fold definitions", "path": "data/interim/dutch_multiforest_folds", "access": "generated"}
+      ],
+      "outputs": [
+        "results/tables/dutch_forest_sites.csv",
+        "results/tables/dutch_pairwise_transfer.csv",
+        "results/tables/dutch_transfer_fold_metrics.csv",
+        "results/tables/dutch_transfer_uncertainty.csv",
+        "results/tables/dutch_distance_association.csv",
+        "results/figures/main/fig05_dutch_transferability.pdf"
+      ]
+    },
+    {
+      "id": "reference-assisted",
+      "title": "Dutch rank transfer and sparse local references",
+      "summary": "Relative ordering and local-reference budgets from 0 to 200 units.",
+      "readme": "workflows/reference_assisted/README.md",
+      "parameters": "workflows/reference_assisted/parameters.yaml",
+      "inputs": [
+        {"name": "Dutch 20-forest cohort", "path": "data/processed/dutch_multiforest_cohort.parquet", "access": "generated from public AHN4 and forest maps"},
+        {"name": "Dutch Tessera features", "path": "data/processed/dutch_multiforest_tessera_features.parquet", "access": "public Tessera v1 release"},
+        {"name": "spatial fold definitions", "path": "data/interim/dutch_multiforest_folds", "access": "generated"}
+      ],
+      "outputs": [
+        "results/tables/rank_transfer.csv",
+        "results/tables/local_reference_curve.csv",
+        "results/figures/main/fig06_dutch_rank_reference.pdf",
+        "results/figures/diagnostics/rank_vs_absolute_transfer.png",
+        "results/figures/diagnostics/local_reference_rank_curve.png"
+      ]
+    },
+    {
+      "id": "reference-uncertainty",
+      "title": "Cairngorms LiDAR reference uncertainty",
+      "summary": "Delete-one-block estimates of finite-support instability.",
+      "readme": "workflows/reference_uncertainty/README.md",
+      "parameters": "workflows/reference_uncertainty/parameters.yaml",
+      "inputs": [
+        {"name": "Cairngorms canopy-height model", "path": "data/raw/scotland_lidar/chm/Cairngorms_standard_CHM_DSM_DTM_1m_res.tif", "access": "collaborator supplied"},
+        {"name": "Cairngorms surface targets", "path": "data/processed/cairngorms_surface_targets.parquet", "access": "derived from collaborator-supplied LiDAR"},
+        {"name": "held-out predictions", "path": "data/processed/cairngorms_surface_predictions.parquet", "access": "generated"}
+      ],
+      "outputs": [
+        "results/tables/lidar_reference_uncertainty.csv",
+        "results/tables/lidar_reference_uncertainty_by_fold.csv",
+        "results/figures/main/figS02_reference_stability.pdf",
+        "results/figures/diagnostics/lidar_reference_uncertainty.png"
+      ]
+    }
+  ]
+}

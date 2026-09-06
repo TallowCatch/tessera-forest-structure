@@ -1,0 +1,22 @@
+study:
+  landscapes: [Cairngorms, Savelsbos]
+  support_m: 50
+  question: direct transfer and joint training across contrasting landscapes
+harmonised_targets:
+  - mean_height
+  - p95_height
+  - within_cell_height_sd
+  - height_cv
+validation:
+  spatial_folds: 5
+  preserve_landscape_specific_held_out_folds: true
+  equal_total_weight_per_landscape: true
+models:
+  direct_transfer:
+    family: ridge
+    alpha: 100.0
+  joint_training:
+    family: multilayer_perceptron
+    feature_dimensions: 512
+    hidden_dimensions: [256, 128]
+    random_seeds: [20260821, 20260822, 20260823]

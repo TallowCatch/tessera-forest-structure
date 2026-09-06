@@ -1,0 +1,34 @@
+name: tessera-forest-structure
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - h5py
+  - hdf5
+  - joblib
+  - gdal
+  - geopandas
+  - gsl
+  - geotiff
+  - matplotlib
+  - numpy
+  - pandas
+  - pillow
+  - pyarrow
+  - pyproj
+  - pytorch
+  - pyyaml
+  - rasterio
+  - requests
+  - scikit-learn
+  - scipy
+  - shapely
+  - pytest
+  - ruff
+  - pip
+  - pip:
+      - geotessera==0.9.0
+      - laspy[lazrs]==2.7.0
+      - neonutilities==2.0.1
+      - planetary-computer
+      - pystac-client

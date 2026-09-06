@@ -1,0 +1,26 @@
+study:
+  landscape: Savelsbos, the Netherlands
+  lidar_campaign: AHN4
+  lidar_year: 2021
+  tessera_year: 2021
+  support_m: 50
+  tessera_channels: 128
+targets:
+  - p95_height
+  - return_height_sd
+  - return_height_cv
+  - return_height_entropy
+  - pulse_penetration
+  - sigma_z
+validation:
+  spatial_folds: 5
+  minimum_train_units: 150
+  minimum_test_units: 30
+  equal_spatial_block_weight: true
+model:
+  family: ridge
+  alpha: 100.0
+height_adjustment:
+  predictors: [mean_height, p95_height]
+  spline_knots: 5
+  ridge_alpha: 10.0

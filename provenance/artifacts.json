@@ -1,0 +1,281 @@
+{
+  "artifacts": [
+    {
+      "bytes": 948,
+      "path": "examples/demo_data/reference_transfer.csv",
+      "sha256": "5d4f9646c960379483fb18560332f5b4e6255c24890b4b6874695a9b233e9d53"
+    },
+    {
+      "bytes": 538219,
+      "path": "results/figures/diagnostics/cairngorms_observed_vs_predicted.png",
+      "sha256": "41bf6ceeda5b82c87a393125e9dc69190aed4bad407d2ce649a57478e32a88d8"
+    },
+    {
+      "bytes": 741128,
+      "path": "results/figures/diagnostics/cross_landscape_transfer.png",
+      "sha256": "25f16913f0b1778852bdbe5f4550040c0bc6ad42bf7cb041e88dbdf75c83416a"
+    },
+    {
+      "bytes": 113708,
+      "path": "results/figures/diagnostics/joint_landscape_model.png",
+      "sha256": "441e6389efad463e4b8decfe3bf53888d491631dc21e672fcdf7c82c8dc60891"
+    },
+    {
+      "bytes": 273973,
+      "path": "results/figures/diagnostics/lidar_reference_uncertainty.png",
+      "sha256": "5fc77171dc4895aca1a15e76a3b1c82808111cb7b5985173544248217633091c"
+    },
+    {
+      "bytes": 302515,
+      "path": "results/figures/diagnostics/local_reference_rank_curve.png",
+      "sha256": "ad518f36c006af3404549e34d1ac0acfc250f6c220bc4bd265078b52848ca221"
+    },
+    {
+      "bytes": 140743,
+      "path": "results/figures/diagnostics/rank_vs_absolute_transfer.png",
+      "sha256": "93ea30e0408cd8d9071c5e3f0f7badd09b8c2d51c5279d74af2296b19d539d7a"
+    },
+    {
+      "bytes": 290549,
+      "path": "results/figures/main/fig01_study_landscapes.pdf",
+      "sha256": "0a729d5cd29c75c9791413a909284f38d6daad72cc900dbd5194d5adbc9fffdd"
+    },
+    {
+      "bytes": 944081,
+      "path": "results/figures/main/fig01_study_landscapes.png",
+      "sha256": "cff3bceb42b01f853e6fa0ad9fee5e93a2469911f4a10aeed1cd29bef6b868d8"
+    },
+    {
+      "bytes": 139277,
+      "path": "results/figures/main/fig02_study_design.pdf",
+      "sha256": "5f3e10d2da35295805c49acb5c4c9d22de7e4e980b80f2d5ad12608ab9f2e537"
+    },
+    {
+      "bytes": 252080,
+      "path": "results/figures/main/fig02_study_design.png",
+      "sha256": "8c962f3dc3fb3b0d283af45d6b87ddd2033fcecb663ae4ae0bfd0edf1e193f29"
+    },
+    {
+      "bytes": 110548,
+      "path": "results/figures/main/fig03_cairngorms_core_predictions.pdf",
+      "sha256": "116e11173a6f907610eabcfe29028da50c747ee3842ec042a2783e87057f5dfb"
+    },
+    {
+      "bytes": 831592,
+      "path": "results/figures/main/fig03_cairngorms_core_predictions.png",
+      "sha256": "ed41b9bfef078c8940da7fdad0cdeb8d4f02fb711c47c61b546d3ce4f1315a8f"
+    },
+    {
+      "bytes": 101783,
+      "path": "results/figures/main/fig04_height_adjustment.pdf",
+      "sha256": "810d6fb3aa8b510f65a722c7d466b641929ee64bd8c6f4fb270dc16c6c650531"
+    },
+    {
+      "bytes": 1106858,
+      "path": "results/figures/main/fig04_height_adjustment.png",
+      "sha256": "9a17276c521c2657cc52207334e970179413c843f4d14642a3f5973c5487836e"
+    },
+    {
+      "bytes": 130498,
+      "path": "results/figures/main/fig05_dutch_transferability.pdf",
+      "sha256": "33ea6f2074d03ec12118300d7bd478725832750b89542d8fbefc74f493d1f636"
+    },
+    {
+      "bytes": 606210,
+      "path": "results/figures/main/fig05_dutch_transferability.png",
+      "sha256": "1fbf46824f068afaea78da7ce7205fe575f9945c201a77641e17385d57d09ac4"
+    },
+    {
+      "bytes": 88612,
+      "path": "results/figures/main/fig06_dutch_rank_reference.pdf",
+      "sha256": "d185d739dca1052e27151dad32ff6b4acc44d38cd706642f7396a245dc90cdab"
+    },
+    {
+      "bytes": 339467,
+      "path": "results/figures/main/fig06_dutch_rank_reference.png",
+      "sha256": "7810bc994d2301af4ebe6ee9b714eeafa77ab59bff75bf032076bb83975ab6cc"
+    },
+    {
+      "bytes": 42259,
+      "path": "results/figures/main/figS01_target_distributions_combined.pdf",
+      "sha256": "e787bf51fb1b2880cc452f56ab7adf881ce9bc985eb23baee1ab964263a1316a"
+    },
+    {
+      "bytes": 409416,
+      "path": "results/figures/main/figS01_target_distributions_combined.png",
+      "sha256": "2230310d86a0d6ea5270b883f530b7027ad3784bad6e840074b148a7adef6058"
+    },
+    {
+      "bytes": 42519,
+      "path": "results/figures/main/figS02_reference_stability.pdf",
+      "sha256": "69fcb6dbf99274188c3dbb24419ab8cc3c040ab53ab0a18d2cbf281915ffdf16"
+    },
+    {
+      "bytes": 157068,
+      "path": "results/figures/main/figS02_reference_stability.png",
+      "sha256": "39008246496b4b4433edc1acd51c7f8bb280367d584c164eed8770ffcedebff3"
+    },
+    {
+      "bytes": 93565,
+      "path": "results/figures/main/figS04_all_predictions.pdf",
+      "sha256": "de176302748c9f0d072f78b177ead6b2404a994e5c34ae21402a7fe0ef771770"
+    },
+    {
+      "bytes": 979401,
+      "path": "results/figures/main/figS04_all_predictions.png",
+      "sha256": "821096a37a4bcda066b241bda7dc605b221a732a4829150cd1dc0bca1bc261d8"
+    },
+    {
+      "bytes": 87923,
+      "path": "results/figures/main/figS05_direct_cross_landscape_predictions.pdf",
+      "sha256": "6eda59d4c2f3f19346ad1782b471d6d85ae30fd1e6ba260b930e1ab07570518c"
+    },
+    {
+      "bytes": 22342,
+      "path": "results/figures/main/figS06_version_comparison.pdf",
+      "sha256": "0f3d20807dc5e85446c5dcd9ad7de00641aa16ffc3b1ef4f77065fc30754791a"
+    },
+    {
+      "bytes": 175300,
+      "path": "results/figures/main/figS06_version_comparison.png",
+      "sha256": "f75f7c783ca32e448f1f781f252fff019aa4551e065e4f4a03a742711124c125"
+    },
+    {
+      "bytes": 52125,
+      "path": "results/figures/main/figS08_height_model_predictions.pdf",
+      "sha256": "61dd2c6af50cf3e4da73051b2aac05efc3440d2cbf219532529b9f4b1c33a2b9"
+    },
+    {
+      "bytes": 717472,
+      "path": "results/figures/main/figS08_height_model_predictions.png",
+      "sha256": "c3d605a2f040b6c556db3e78ef1a12eb7f9514136e431fbffb2a2554a8c81abd"
+    },
+    {
+      "bytes": 172511,
+      "path": "results/figures/main/figS09_point_cloud_predictions.pdf",
+      "sha256": "ae0337f82755c8ab521a51d8a8fba2a864214b2c3676ec998d5ac09f6619301d"
+    },
+    {
+      "bytes": 837565,
+      "path": "results/figures/main/figS09_point_cloud_predictions.png",
+      "sha256": "884e5ea8a72431675e0d202de5c28457816a223e28661871e81ac3d723843693"
+    },
+    {
+      "bytes": 35626,
+      "path": "results/figures/main/transfer_outcome_diagnostics.pdf",
+      "sha256": "a65e7411ef7066e46af9e1123653dca330b9c01e9c7069e698f1c9a2daacbb90"
+    },
+    {
+      "bytes": 218770,
+      "path": "results/figures/main/transfer_outcome_diagnostics.png",
+      "sha256": "5f5b52d36c6ffd3bc4a565d0831ceb5a551b3b416863ff0f4bec1a16b25382ad"
+    },
+    {
+      "bytes": 4776,
+      "path": "results/tables/cairngorms_model_comparison.csv",
+      "sha256": "3923f07b7acbc25c55eaae795f6bb748a5549fa641d4bb6330b6f7c80fda8544"
+    },
+    {
+      "bytes": 5838,
+      "path": "results/tables/cairngorms_performance.csv",
+      "sha256": "ec27d1bc334cccd6879a9ce3fd4c85e9b014208c22287f8711df3435c76d11c2"
+    },
+    {
+      "bytes": 4442,
+      "path": "results/tables/cairngorms_point_cloud_performance.csv",
+      "sha256": "d8a3ccba4cb6c2e3c47aecde7bc7238ebb99d30b8041db58f6b033b5d3e62f07"
+    },
+    {
+      "bytes": 7633,
+      "path": "results/tables/cross_landscape_transfer.csv",
+      "sha256": "dbe2b4278b12e6ee52275d7d968713d8bfc31f07dca9a6ce8eb5a619be7d72bf"
+    },
+    {
+      "bytes": 4542,
+      "path": "results/tables/diagnostics/cairngorms_embedding_version_comparison.csv",
+      "sha256": "15814d9cd78481fa7c7012c73f3f008c11835621653dd65d44952420c23513e2"
+    },
+    {
+      "bytes": 1664,
+      "path": "results/tables/diagnostics/cairngorms_height_adjustment.csv",
+      "sha256": "8859fd41779451cd851e6ce31352c5883bc84194900cbdc6e11bda74ca7e61b4"
+    },
+    {
+      "bytes": 679,
+      "path": "results/tables/diagnostics/dutch_eligible_unit_reconstruction.csv",
+      "sha256": "55ba78c82931cd21af45df55da86c8cd5a6099fbf5ffdf404bc3e87ae233d45d"
+    },
+    {
+      "bytes": 151,
+      "path": "results/tables/diagnostics/dutch_height_cv_reconstruction.csv",
+      "sha256": "36640fa7f55ef8c15605cd5d4f922679a5438f391c12b4848c574f6cf06c87bd"
+    },
+    {
+      "bytes": 313,
+      "path": "results/tables/dutch_distance_association.csv",
+      "sha256": "6e83f0faf70d92e157d006454b8a59d452161e66a7b5fd4a6ed51da51ab189c4"
+    },
+    {
+      "bytes": 4081,
+      "path": "results/tables/dutch_forest_sites.csv",
+      "sha256": "9537388155e60762f999ad76fd357d26da3936c66a7a03a65e252a9e50526b13"
+    },
+    {
+      "bytes": 549150,
+      "path": "results/tables/dutch_pairwise_transfer.csv",
+      "sha256": "a32852f613be934bffd80c9aabc1d6ca92a76d513fb9990dd3db87858ab02503"
+    },
+    {
+      "bytes": 130196,
+      "path": "results/tables/dutch_rank_transfer_by_fold.csv",
+      "sha256": "2cd1c3f02eacdf615f7eaa547185bc121fe962c050c56de0a39bf25a73a4bb54"
+    },
+    {
+      "bytes": 1123317,
+      "path": "results/tables/dutch_transfer_fold_metrics.csv",
+      "sha256": "37da1cf1ca7000503858c5ffd249aa1fbf55c033106efe4f048fbbb524cd3a3a"
+    },
+    {
+      "bytes": 29828,
+      "path": "results/tables/dutch_transfer_uncertainty.csv",
+      "sha256": "93ef4c1e48b0d5b9033690b585621f44dbe0e62e4ead31a7ce69ff9450c947c0"
+    },
+    {
+      "bytes": 1261,
+      "path": "results/tables/joint_landscape_model.csv",
+      "sha256": "0941a3faba2bf9dfaa4397675a59e637513d96890ac91fb60bbc7926a5e238a8"
+    },
+    {
+      "bytes": 2604,
+      "path": "results/tables/lidar_reference_uncertainty.csv",
+      "sha256": "ab6d2953cb9ebb15e5abfc85ed34b23f014c552e55e0392903b321c9e120f5b9"
+    },
+    {
+      "bytes": 8247,
+      "path": "results/tables/lidar_reference_uncertainty_by_fold.csv",
+      "sha256": "971ed10df6f60f75f358fc21304c6ef44f377342aae8015af358ba9c534ccabe"
+    },
+    {
+      "bytes": 82874,
+      "path": "results/tables/local_reference_curve.csv",
+      "sha256": "28f89914fb91b948e6e28ab55e7e9a07f81fe8a258b8ac5961d10b939bbee09e"
+    },
+    {
+      "bytes": 998,
+      "path": "results/tables/rank_transfer.csv",
+      "sha256": "8949ba58a1c7af6c60ea3608a3f78c7501d3b6845502e329be37e8c327e86fb5"
+    },
+    {
+      "bytes": 48497,
+      "path": "results/tables/savelsbos_local_performance.csv",
+      "sha256": "d024216b8cd14ef6073e08c89c4dbe897ac32fb2a52817129d92839d24e7b6af"
+    },
+    {
+      "bytes": 551,
+      "path": "results/tables/sd_denominator_sensitivity.csv",
+      "sha256": "db64dfe01f9719461d61d8a677465b32b7020a824bee6136aea2a1f1ab19c32e"
+    }
+  ],
+  "hash": "sha256",
+  "schema_version": 1
+}

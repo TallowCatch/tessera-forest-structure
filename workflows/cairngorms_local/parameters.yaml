@@ -1,0 +1,33 @@
+study:
+  landscape: Cairngorms National Park, Scotland
+  lidar_year: 2023
+  tessera_year: 2023
+  support_m: 50
+  tessera_channels: 128
+  tessera_patch_cells: 5
+targets:
+  original:
+    - p95_height
+    - canopy_height_sd
+    - canopy_height_cv
+    - robust_canopy_height_cv
+    - canopy_rumple
+    - canopy_open_fraction
+    - canopy_height_kurtosis
+  height_adjusted:
+    - canopy_height_sd
+    - canopy_height_cv
+    - robust_canopy_height_cv
+    - canopy_rumple
+    - canopy_open_fraction
+    - canopy_height_kurtosis
+validation:
+  spatial_folds: 5
+  train_test_exclusion_m: 2000
+  random_seeds: [20260804, 20260805, 20260806]
+  equal_spatial_block_weight: true
+models:
+  families: [ridge, multilayer_perceptron, convolutional_network, u_net]
+  mlp_hidden_dimensions: [256, 128]
+  dropout: 0.10
+  maximum_epochs: 80

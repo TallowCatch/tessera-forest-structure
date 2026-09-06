@@ -1,0 +1,22 @@
+study:
+  landscape: Cairngorms National Park, Scotland
+  support_m: 50
+  source_cell_m: 10
+  source_cells_per_unit: 25
+method:
+  name: delete-one-spatial-block jackknife
+  scope: finite-support and within-window spatial-composition uncertainty
+  excluded_uncertainty:
+    - lidar_acquisition
+    - point_classification
+    - ground_normalisation
+    - canopy_height_model_production
+targets:
+  - mean_height
+  - p95_height
+  - canopy_height_sd
+  - canopy_height_cv
+  - robust_canopy_height_cv
+  - canopy_rumple
+  - canopy_open_fraction
+  - canopy_height_kurtosis
