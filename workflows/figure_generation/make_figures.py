@@ -996,20 +996,25 @@ def make_core_prediction_figure() -> None:
     targets = pd.read_parquet(CAIRN_TARGETS)
     predictions = core_predictions("raw")
     fig = plt.figure(figsize=(11.2, 6.6))
-    grid = fig.add_gridspec(2, 3, hspace=0.36, wspace=0.28)
+    grid = fig.add_gridspec(2, 3, hspace=0.36, wspace=0.34)
     density = None
     for index, target in enumerate(CORE_TARGETS):
-        axis = fig.add_subplot(grid[0, index])
+        cell = grid[0, index].subgridspec(1, 2, width_ratios=[1, 0.05], wspace=0.08)
+        axis = fig.add_subplot(cell[0, 0])
+        color_axis = fig.add_subplot(cell[0, 1])
+        color_axis.set_axis_off()
         data = predictions[predictions["target"] == target]
         observed_prediction(axis, data, target, "raw")
         axis.set_xlabel(f"LiDAR observed ({UNITS[target]})")
         axis.set_ylabel(f"Tessera predicted ({UNITS[target]})")
         density = axis._density_artist  # type: ignore[attr-defined]
         panel(axis, index)
-    if density is not None:
-        color_axis = fig.add_axes([0.955, 0.59, 0.012, 0.31])
-        colorbar = fig.colorbar(density, cax=color_axis)
-        colorbar.set_label("Observations per hexagon (log scale)")
+        if index == len(CORE_TARGETS) - 1 and density is not None:
+            color_axis.set_axis_on()
+            color_axis.tick_params(labelsize=7.2)
+            color_axis.spines[:].set_visible(True)
+            colorbar = fig.colorbar(density, cax=color_axis)
+            colorbar.set_label("Observations per hexagon (log scale)")
 
     block = targets["spatial_block"].value_counts().index[0]
     spatial = targets.loc[
@@ -1028,7 +1033,9 @@ def make_core_prediction_figure() -> None:
         ("residual", "RdBu_r", -residual_limit, residual_limit, "Prediction minus observation"),
     ]
     for offset, (column, cmap, lower, upper, label) in enumerate(specs):
-        axis = fig.add_subplot(grid[1, offset])
+        cell = grid[1, offset].subgridspec(1, 2, width_ratios=[1, 0.05], wspace=0.08)
+        axis = fig.add_subplot(cell[0, 0])
+        color_axis = fig.add_subplot(cell[0, 1])
         image = axis.scatter(
             spatial["bng_x"],
             spatial["bng_y"],
@@ -1047,10 +1054,10 @@ def make_core_prediction_figure() -> None:
         axis.xaxis.set_major_locator(MaxNLocator(4))
         axis.yaxis.set_major_locator(MaxNLocator(4))
         axis.set_ylabel("Northing (km)" if offset == 0 else "")
-        colorbar = fig.colorbar(image, ax=axis, fraction=0.045, pad=0.02)
+        colorbar = fig.colorbar(image, cax=color_axis)
         colorbar.set_label(label)
         panel(axis, offset + 3)
-    fig.subplots_adjust(left=0.065, right=0.94, top=0.97, bottom=0.08)
+    fig.subplots_adjust(left=0.065, right=0.975, top=0.97, bottom=0.08)
     save(fig, "fig03_cairngorms_core_predictions")
 
 
@@ -1060,11 +1067,13 @@ def make_height_adjustment_figure() -> None:
     diagnostics = pd.read_csv(HEIGHT_DIAGNOSTICS).set_index("target")
     components = height_components(targets, CORE_TARGETS)
     fig = plt.figure(figsize=(11.2, 6.7))
-    grid = fig.add_gridspec(2, 3, hspace=0.36, wspace=0.31)
+    grid = fig.add_gridspec(2, 3, hspace=0.36, wspace=0.34)
     mean_height = targets["canopy_mean_height_m"].to_numpy(float)
     p95_height = targets["canopy_p95_height_m"].to_numpy(float)
     for index, target in enumerate(CORE_TARGETS):
-        axis = fig.add_subplot(grid[0, index])
+        cell = grid[0, index].subgridspec(1, 2, width_ratios=[1, 0.05], wspace=0.08)
+        axis = fig.add_subplot(cell[0, 0])
+        color_axis = fig.add_subplot(cell[0, 1])
         fitted = components[:, index]
         lower, upper = np.quantile(fitted, [0.01, 0.99])
         image = axis.hexbin(
@@ -1096,24 +1105,29 @@ def make_height_adjustment_figure() -> None:
         )
         axis.set_xlabel("Mean canopy height (m)")
         axis.set_ylabel("P95 canopy height (m)")
-        colorbar = fig.colorbar(image, ax=axis, fraction=0.045, pad=0.02)
+        colorbar = fig.colorbar(image, cax=color_axis)
         colorbar.set_label("Fitted height component")
         panel(axis, index)
 
     density = None
     for index, target in enumerate(CORE_TARGETS):
-        axis = fig.add_subplot(grid[1, index])
+        cell = grid[1, index].subgridspec(1, 2, width_ratios=[1, 0.05], wspace=0.08)
+        axis = fig.add_subplot(cell[0, 0])
+        color_axis = fig.add_subplot(cell[0, 1])
+        color_axis.set_axis_off()
         data = predictions[predictions["target"] == target]
         observed_prediction(axis, data, target, "height_adjusted")
         axis.set_xlabel("Observed height-adjusted value")
         axis.set_ylabel("Predicted height-adjusted value")
         density = axis._density_artist  # type: ignore[attr-defined]
         panel(axis, index + 3)
-    if density is not None:
-        color_axis = fig.add_axes([0.955, 0.09, 0.012, 0.30])
-        colorbar = fig.colorbar(density, cax=color_axis)
-        colorbar.set_label("Observations per hexagon (log scale)")
-    fig.subplots_adjust(left=0.065, right=0.94, top=0.97, bottom=0.08)
+        if index == len(CORE_TARGETS) - 1 and density is not None:
+            color_axis.set_axis_on()
+            color_axis.tick_params(labelsize=7.2)
+            color_axis.spines[:].set_visible(True)
+            colorbar = fig.colorbar(density, cax=color_axis)
+            colorbar.set_label("Observations per hexagon (log scale)")
+    fig.subplots_adjust(left=0.065, right=0.975, top=0.97, bottom=0.08)
     save(fig, "fig04_height_adjustment")
 
 

@@ -56,14 +56,7 @@ def make_figure() -> plt.Figure:
         & predictions["target"].isin([target for target, _ in TARGETS])
     ].copy()
 
-    figure, axes = plt.subplots(
-        2,
-        2,
-        figsize=(8.2, 7.0),
-        sharex="row",
-        sharey="row",
-        constrained_layout=True,
-    )
+    figure, axes = plt.subplots(1, 4, figsize=(11.2, 3.1))
     panel_letters = iter("abcd")
     last_hexbin = None
 
@@ -74,8 +67,8 @@ def make_figure() -> plt.Figure:
         margin = 0.025 * (upper - lower)
         limits = (lower - margin, upper + margin)
 
-        for column, (model, model_label) in enumerate(MODELS):
-            axis = axes[row, column]
+        for column, (model, _) in enumerate(MODELS):
+            axis = axes[2 * row + column]
             local = target_values[target_values["model"] == model]
             last_hexbin = axis.hexbin(
                 local["observed"],
@@ -120,15 +113,15 @@ def make_figure() -> plt.Figure:
                 ha="left",
                 va="bottom",
             )
-            if row == 0:
-                axis.set_title(model_label, fontsize=10, fontweight="bold", pad=6)
             axis.set_xlabel(f"Observed {target_label.lower()} (m)", fontsize=8.5)
             axis.set_ylabel(f"Predicted {target_label.lower()} (m)", fontsize=8.5)
 
     assert last_hexbin is not None
-    colorbar = figure.colorbar(last_hexbin, ax=axes, location="right", shrink=0.78, pad=0.02)
+    color_axis = figure.add_axes([0.94, 0.19, 0.012, 0.70])
+    colorbar = figure.colorbar(last_hexbin, cax=color_axis)
     colorbar.set_label("Observations per hexagon (log scale)", fontsize=8.5)
     colorbar.ax.tick_params(labelsize=8)
+    figure.subplots_adjust(left=0.055, right=0.915, top=0.94, bottom=0.19, wspace=0.38)
     return figure
 
 

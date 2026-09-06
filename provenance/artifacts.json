@@ -56,24 +56,24 @@
       "sha256": "8c962f3dc3fb3b0d283af45d6b87ddd2033fcecb663ae4ae0bfd0edf1e193f29"
     },
     {
-      "bytes": 110548,
+      "bytes": 63335,
       "path": "results/figures/main/fig03_cairngorms_core_predictions.pdf",
-      "sha256": "116e11173a6f907610eabcfe29028da50c747ee3842ec042a2783e87057f5dfb"
+      "sha256": "cee6931de94101113cd12a649293f17adbacad9e75d994c1b09369f4685970e3"
     },
     {
-      "bytes": 831592,
+      "bytes": 775219,
       "path": "results/figures/main/fig03_cairngorms_core_predictions.png",
-      "sha256": "ed41b9bfef078c8940da7fdad0cdeb8d4f02fb711c47c61b546d3ce4f1315a8f"
+      "sha256": "e3e9c9e867c6e6adfda5358ae3d8505f2db6ebb316f19fea20fca099331e680e"
     },
     {
-      "bytes": 101783,
+      "bytes": 68144,
       "path": "results/figures/main/fig04_height_adjustment.pdf",
-      "sha256": "810d6fb3aa8b510f65a722c7d466b641929ee64bd8c6f4fb270dc16c6c650531"
+      "sha256": "83fec77454d5894a0f2bddd27c1d6d6a1518ff4972186f72d40d1351e32df93c"
     },
     {
-      "bytes": 1106858,
+      "bytes": 973662,
       "path": "results/figures/main/fig04_height_adjustment.png",
-      "sha256": "9a17276c521c2657cc52207334e970179413c843f4d14642a3f5973c5487836e"
+      "sha256": "e4361bfa4b7f3b24e1f9aef080fe97bb89cf048c24bcaa7bc494dd577358c211"
     },
     {
       "bytes": 130498,
@@ -141,14 +141,14 @@
       "sha256": "f75f7c783ca32e448f1f781f252fff019aa4551e065e4f4a03a742711124c125"
     },
     {
-      "bytes": 52125,
+      "bytes": 47339,
       "path": "results/figures/main/figS08_height_model_predictions.pdf",
-      "sha256": "61dd2c6af50cf3e4da73051b2aac05efc3440d2cbf219532529b9f4b1c33a2b9"
+      "sha256": "da0225047e807072541dbbe24140883cf4b2b76d62a054c7cc5e98eef0456fd8"
     },
     {
-      "bytes": 717472,
+      "bytes": 494910,
       "path": "results/figures/main/figS08_height_model_predictions.png",
-      "sha256": "c3d605a2f040b6c556db3e78ef1a12eb7f9514136e431fbffb2a2554a8c81abd"
+      "sha256": "358ac17c0e0f05b4b1adfd08fe088d4462257d469dd3a235ad1ce0a817c5c57f"
     },
     {
       "bytes": 172511,
