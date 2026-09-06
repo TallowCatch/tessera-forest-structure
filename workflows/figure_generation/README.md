@@ -33,6 +33,10 @@ data/interim/cairngorms_height_adjusted/
 data/interim/cairngorms_return_profiles/
 ```
 
+Country locators use the Natural Earth 1:10m admin-0 boundary when it is
+available under `data/external/natural_earth_admin0_10m/`, with the existing
+1:110m boundary as a fallback.
+
 `rebuild_dutch_eligible_units.py` and `enrich_dutch_unit_cv.py` reconstruct the
 mapped Dutch unit table from public source rasters when those files are present.
 All path names describe their scientific content rather than execution order.

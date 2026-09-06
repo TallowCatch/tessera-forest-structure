@@ -36,14 +36,14 @@
       "sha256": "93ea30e0408cd8d9071c5e3f0f7badd09b8c2d51c5279d74af2296b19d539d7a"
     },
     {
-      "bytes": 290549,
+      "bytes": 564623,
       "path": "results/figures/main/fig01_study_landscapes.pdf",
-      "sha256": "0a729d5cd29c75c9791413a909284f38d6daad72cc900dbd5194d5adbc9fffdd"
+      "sha256": "4d4b530d09a609c26c1323f1e7422efd01678365c3f4120a8b26e75261886aa3"
     },
     {
-      "bytes": 944081,
+      "bytes": 963888,
       "path": "results/figures/main/fig01_study_landscapes.png",
-      "sha256": "cff3bceb42b01f853e6fa0ad9fee5e93a2469911f4a10aeed1cd29bef6b868d8"
+      "sha256": "233e614169d4652bd50ef42f5263390c052814c0d44a41e96ff6c76e612ec236"
     },
     {
       "bytes": 139277,

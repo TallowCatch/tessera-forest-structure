@@ -36,7 +36,9 @@ DUTCH_METRICS = ROOT / "results/tables/dutch_transfer_fold_metrics.csv"
 DUTCH_PAIRWISE = ROOT / "results/tables/dutch_pairwise_transfer.csv"
 DUTCH_BOUNDARIES = ROOT / "data/external/ahn4_selection/Nature2000_NL_RDnew.shp"
 DUTCH_COHORT = ROOT / "data/processed/dutch_eligible_units_map.parquet"
-NATURAL_EARTH = ROOT / "data/external/natural_earth_admin0/ne_110m_admin_0_countries.shp"
+NATURAL_EARTH_10M = ROOT / "data/external/natural_earth_admin0_10m/ne_10m_admin_0_countries.shp"
+NATURAL_EARTH_110M = ROOT / "data/external/natural_earth_admin0/ne_110m_admin_0_countries.shp"
+NATURAL_EARTH = NATURAL_EARTH_10M if NATURAL_EARTH_10M.exists() else NATURAL_EARTH_110M
 SATELLITE_CACHE = ROOT / "data/external/eox_s2cloudless"
 RANK_SUMMARY = ROOT / "results/tables/rank_transfer.csv"
 RANK_FOLD_METRICS = ROOT / "results/tables/dutch_rank_transfer_by_fold.csv"
@@ -562,7 +564,7 @@ def make_landscape_figure() -> None:
         cairn_axis, world, "United Kingdom", cairn_lon, cairn_lat, (-11.0, 3.0, 49.0, 60.8)
     )
     add_country_locator(
-        savelsbos_axis, world, "Netherlands", savelsbos_lon, savelsbos_lat, (2.5, 7.8, 50.4, 54.0)
+        savelsbos_axis, world, "Netherlands", savelsbos_lon, savelsbos_lat, (3.0, 7.7, 49.9, 54.0)
     )
 
     for axis, bounds in [(cairn_axis, cairn_zoom), (savelsbos_axis, savelsbos_zoom)]:
