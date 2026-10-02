@@ -1,0 +1,119 @@
+phase26_ahn4_deciduous:
+  study:
+    name: Savelsbos temperate-deciduous replication
+    country: Netherlands
+    analysis_crs: EPSG:28992
+    selection_rule: largest TOP10NL broadleaf area among Natura 2000 sites whose dominant habitat class is N16 and whose AHN4 cells were acquired in one calendar year
+    expected_site_code: NL9801040
+    expected_site_name: Savelsbos
+    expected_ahn4_dates: [20210217]
+
+  sources:
+    ahn4_record: https://zenodo.org/records/8422129
+    ahn4_combined_record: https://zenodo.org/records/18499735
+    ahn4_paper: https://essd.copernicus.org/articles/17/3641/2025/
+    natura_habitat_table: data/external/ahn4_selection/Natura2000_end2021_HABITATCLASS.csv
+    natura_site_boundaries: data/external/ahn4_selection/Nature2000_NL_RDnew.shp
+    ahn4_flighttime: data/raw/ahn4/ahn4_10m_flighttime.tif
+    ahn4_building_road_water_mask: data/raw/ahn4/ahn4_10m_mask_building_road_water.tif
+    ahn4_powerline_mask: data/raw/ahn4/ahn4_10m_mask_powerline.tif
+    ahn4_na_mask: data/raw/ahn4/ahn4_10m_NA_mask.tif
+    ahn4_metrics:
+      ahn4_mean_height_m: data/raw/ahn4/ahn4_10m_mean_normalized_height.tif
+      ahn4_p95_height_m: data/raw/ahn4/ahn4_10m_perc_95_normalized_height.tif
+      ahn4_height_sd_m: data/raw/ahn4/ahn4_10m_std_normalized_height.tif
+      ahn4_height_cv: data/raw/ahn4/ahn4_10m_coeff_var_normalized_height.tif
+      ahn4_entropy: data/raw/ahn4/ahn4_10m_entropy_normalized_height.tif
+      ahn4_pulse_penetration: data/raw/ahn4/ahn4_10m_pulse_penetration_ratio.tif
+      ahn4_sigma_z: data/raw/ahn4/ahn4_10m_sigma_z.tif
+    top10nl_items: https://api.pdok.nl/kadaster/brt-top10nl/ogc/v1/collections/terrein_vlak/items
+    top10nl_collection: https://api.pdok.nl/kadaster/brt-top10nl/ogc/v1/collections/terrein_vlak
+    top10nl_land_use_field: typelandgebruik
+    top10nl_broadleaf_value: "bos: loofbos"
+
+  tessera:
+    year: 2021
+    dataset_version: "1.0"
+    dataset_variant: vultr
+    dimensions: 128
+
+  population:
+    output_support_m: 50
+    lidar_cell_m: 10
+    required_broadleaf_fraction: 0.80
+    minimum_broadleaf_area_km2: 1.0
+    minimum_valid_lidar_fraction: 0.95
+    minimum_mean_height_m: 10.0
+    maximum_pulse_penetration: 0.50
+
+  evaluation:
+    spatial_block_m: 1000
+    evaluation_block_m: 500
+    exclusion_buffer_m: 500
+    folds: 5
+    models: [conventional_ridge, tessera_ridge, fused_ridge]
+    ridge_alpha: 100.0
+    fold_seed: 20260811
+    bootstrap_seed: 20260812
+    bootstrap_replicates: 2000
+    minimum_cohort_rows: 250
+    minimum_train_rows: 150
+    minimum_test_rows: 30
+    primary_targets:
+      - ahn4_p95_height_m
+      - ahn4_height_sd_m
+      - ahn4_height_cv
+      - ahn4_entropy
+      - ahn4_pulse_penetration
+      - ahn4_sigma_z
+    height_adjustment_predictors:
+      - ahn4_mean_height_m
+      - ahn4_p95_height_m
+    height_adjustment_spline_knots: 5
+    height_adjustment_ridge_alpha: 10.0
+
+  predictors:
+    primary_tessera_features: mean
+    tessera_sensitivity_features: [mean, std, dx, dy]
+    minimum_valid_tessera_pixels: 20
+    conventional_year: 2021
+    conventional_context_cells: 5
+    stac_api: https://planetarycomputer.microsoft.com/api/stac/v1
+    sentinel_2:
+      collection: sentinel-2-l2a
+      bands:
+        B02: blue
+        B03: green
+        B04: red
+        B08: nir
+        B11: swir1
+        B12: swir2
+      valid_scl_classes: [2, 4, 5, 6, 7]
+      processing_baseline_offset_dn: 1000
+      scenes_per_month_per_mgrs_tile: 2
+      maximum_item_cloud_cover_percent: 80
+      reflectance_scale: 0.0001
+      minimum_valid_observations_per_point: 6
+    sentinel_1:
+      collection: sentinel-1-rtc
+      polarizations: [vv, vh]
+      scenes_per_month_per_orbit_state: 2
+      minimum_valid_observations_per_point_per_state: 6
+    topography:
+      collection: cop-dem-glo-30
+      analysis_crs: EPSG:28992
+      analysis_resolution_m: 30
+
+  outputs:
+    selected_site: data/processed/phase26_ahn4_selected_site.gpkg
+    selection_freeze: metadata/phase26_ahn4_selection_freeze.json
+    cohort: data/processed/phase26_ahn4_deciduous_cohort.parquet
+    folds: data/interim/phase26_ahn4_folds
+    tessera: data/processed/phase26_ahn4_tessera.parquet
+    conventional: data/processed/phase26_ahn4_conventional.parquet
+    predictions: data/processed/phase26_ahn4_predictions.parquet
+    metrics: outputs/tables/phase26_ahn4_metrics.csv
+    bootstrap: outputs/tables/phase26_ahn4_paired_bootstrap.csv
+    report: outputs/reports/phase26_ahn4_results.md
+    design_freeze: metadata/phase26_ahn4_design_freeze.json
+    result_freeze: metadata/phase26_ahn4_result_freeze.json

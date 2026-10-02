@@ -1,0 +1,41 @@
+phase39_dutch_rank_transfer:
+  description: >-
+    Test whether TESSERA transfers relative within-forest spatial pattern more
+    reliably than absolute AHN4 values, and estimate a finer local-reference
+    curve without opening the held-out spatial folds.
+  inputs:
+    cohort: data/processed/phase37_dutch_expanded_cohort.parquet
+    features: data/processed/phase37_dutch_expanded_tessera_v1.parquet
+    folds: data/interim/phase37_dutch_expanded_folds
+    sites: outputs/tables/phase37_dutch_site_summary.csv
+  evaluation:
+    targets:
+      - ahn4_p95_height_m
+      - ahn4_height_sd_m
+      - ahn4_height_cv
+      - ahn4_entropy
+      - ahn4_pulse_penetration
+      - ahn4_sigma_z
+    fold_count: 5
+    ridge_alpha: 100.0
+    budgets: [0, 2, 5, 10, 25, 50, 100, 200]
+    finite_repetitions: 10
+    sampling_seed: 20260916
+    full_network_max_budget: 100
+    exact_200_minimum_pool: 200
+    spatial_pattern_block: fold_block
+    primary_methods:
+      - source_ridge
+      - source_offset
+      - target_only_ridge
+      - source_plus_target_ridge
+  outputs:
+    worker_directory: data/interim/phase39_rank_transfer_workers
+    predictions: data/processed/phase39_zero_shot_predictions.parquet
+    metrics: outputs/tables/phase39_rank_transfer_fold_metrics.csv
+    summary: outputs/tables/phase39_rank_transfer_summary.csv
+    zero_shot_summary: outputs/tables/phase39_zero_shot_rank_summary.csv
+    site_summary: outputs/tables/phase39_rank_transfer_site_summary.csv
+    figures: outputs/figures/phase39_rank_transfer
+    report: outputs/reports/phase39_rank_transfer.md
+    result_freeze: metadata/phase39_rank_transfer_result.json

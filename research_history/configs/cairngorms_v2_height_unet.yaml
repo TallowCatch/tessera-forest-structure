@@ -1,0 +1,75 @@
+phase30_cairngorms_v2_height_unet:
+  study:
+    name: Audited Cairngorms TESSERA v2 canopy-height experiment
+    lidar_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: experimental_v2
+    analysis_crs: EPSG:27700
+    interpretation: frozen within-Cairngorms spatial evaluation
+
+  frozen_inputs:
+    target_table: data/processed/phase22_cairngorms_surface_targets.parquet
+    v2_raw_array_directory: data/interim/phase29_cairngorms_v2_surface_raw
+    v2_summary_array: data/interim/phase29_cairngorms_v2_surface_adjusted/tessera.npy
+    dense_v2_manifest: metadata/phase28_cairngorms_v2_dense_acquisition.json
+
+  targets:
+    names:
+      - canopy_mean_height_m
+      - canopy_p95_height_m
+    primary: canopy_p95_height_m
+    secondary: canopy_mean_height_m
+    units: m
+
+  evaluation:
+    folds: 5
+    seeds: [20260804, 20260805, 20260806]
+    models:
+      - tessera_v2_mlp_5x5
+      - tessera_v2_unet_audited
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260816
+    opening_groups:
+      closed_maximum: 0.05
+      intermediate_maximum: 0.20
+    success:
+      minimum_primary_rmse_reduction_fraction: 0.02
+      require_bootstrap_ci_below_zero: true
+
+  model:
+    mlp_hidden_dimensions: [256, 128]
+    dropout: 0.10
+    unet_base_channels: 24
+    input_channels: 129
+    output_channels: 2
+    chip_cells: 128
+    chip_stride_cells: 96
+    training_chip_minimum_targets: 1
+    batch_size:
+      tessera_v2_mlp_5x5: 1024
+      tessera_v2_unet_audited: 2
+    maximum_epochs: 50
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  audit_corrections:
+    require_all_training_targets_covered: true
+    divide_training_weight_by_chip_multiplicity: true
+    enforce_minimum_selected_epoch: true
+    refit_on_complete_training_fold: true
+
+  outputs:
+    array_directory: data/interim/phase30_cairngorms_v2_height
+    result_directory: data/interim/phase30_cairngorms_v2_height_results
+    preparation_status: metadata/phase30_cairngorms_v2_height_preparation.json
+    predictions: data/processed/phase30_cairngorms_v2_height_predictions.parquet
+    fold_metrics: outputs/tables/phase30_cairngorms_v2_height_fold_metrics.csv
+    macro_metrics: outputs/tables/phase30_cairngorms_v2_height_macro.csv
+    comparison: outputs/tables/phase30_cairngorms_v2_height_comparison.csv
+    opening_diagnostic: outputs/tables/phase30_cairngorms_v2_height_opening_diagnostic.csv
+    figure: outputs/figures/phase30_cairngorms_v2_height.png
+    report: outputs/reports/phase30_cairngorms_v2_height.md
+    result_freeze: metadata/phase30_cairngorms_v2_height_result_freeze.json
+

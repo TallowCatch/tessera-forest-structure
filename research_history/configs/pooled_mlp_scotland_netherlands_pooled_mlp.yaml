@@ -1,0 +1,35 @@
+phase35_scotland_netherlands_pooled_mlp:
+  study:
+    name: Joint Scotland-Netherlands TESSERA v2 MLP
+    interpretation: pooled versus local MLP under identical spatial folds
+    source_phase: phase32_scotland_netherlands_transfer
+    support_m: 50
+
+  features:
+    panel: context
+    dimensions: 512
+
+  model:
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 1024
+    maximum_epochs: 80
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    folds: 5
+    seeds: [20260821, 20260822, 20260823]
+    equal_total_weight_per_country: true
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260822
+
+  outputs:
+    predictions: data/processed/phase35_scotland_netherlands_pooled_mlp_predictions.parquet
+    metrics: outputs/tables/phase35_scotland_netherlands_pooled_mlp_metrics.csv
+    comparison: outputs/tables/phase35_scotland_netherlands_pooled_mlp_comparison.csv
+    bootstrap: outputs/tables/phase35_scotland_netherlands_pooled_mlp_bootstrap.csv
+    training: outputs/tables/phase35_scotland_netherlands_pooled_mlp_training.csv
+    figure: outputs/figures/phase35_scotland_netherlands_pooled_mlp.pdf
+    report: outputs/reports/phase35_scotland_netherlands_pooled_mlp.md
+    result_freeze: metadata/phase35_scotland_netherlands_pooled_mlp_result_freeze.json

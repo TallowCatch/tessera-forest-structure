@@ -9,8 +9,13 @@ LiDAR data, or cluster access:
 python -m pip install -e ".[dev]"
 tessera-study verify
 tessera-study demo
-python -m pytest -q
+python -m pytest -q tests/test_demo.py tests/test_release_package.py tests/test_repository_structure.py
 ```
+
+The temporal-transfer tests import the geospatial workflow. For the complete
+test suite outside the conda environment, install `.[dev,analysis]` and run
+`python -m pytest -q`. `.[dev]` alone remains sufficient for the lightweight
+demonstration and core checks.
 
 `verify` checks registered workflow paths and SHA-256 hashes for every curated
 result table and figure. `demo` fits a small ridge model to synthetic

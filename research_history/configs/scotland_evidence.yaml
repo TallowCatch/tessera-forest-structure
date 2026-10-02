@@ -1,0 +1,69 @@
+phase16_scotland_evidence:
+  inputs:
+    phase15_result_freeze: metadata/phase15_arran_result_freeze.json
+    arran_sample: data/processed/phase15_arran_lidar_sample.parquet
+    arran_tessera: data/processed/phase15_arran_tessera.parquet
+    arran_conventional: data/processed/phase15_arran_conventional_predictors.parquet
+    arran_oof_predictions: data/processed/phase15_arran_primary_oof_predictions.parquet
+    cairngorms_sample: data/processed/phase14_scotland_lidar_sample.parquet
+    cairngorms_tessera: data/processed/phase14_scotland_tessera.parquet
+    cairngorms_conventional: data/processed/phase15_cairngorms_conventional_predictors.parquet
+    cairngorms_to_arran_predictions: data/processed/phase15_cairngorms_to_arran_predictions.parquet
+    cairngorms_workbook: /Users/ameerfiras/Downloads/250306_LiDAR_metrics_list.xlsx
+
+  target:
+    name: lidar_canopy_shannon
+    lidarshm_height_breaks_m: [-1.0, 2.0, 5.0, 10.0, 15.0, 35.0]
+    spatial_resolution_m: 10
+
+  uncertainty:
+    bootstrap_unit: frozen_1km_spatial_block
+    replicates: 2000
+    seed: 20260727
+    confidence_interval_percent: 95
+    primary_comparison:
+      model: tessera_nonlinear
+      reference: sentinel2_terrain_nonlinear
+
+  reciprocal_transfer:
+    source: Arran_2025
+    target: Cairngorms_2023
+    interpretation: geographic_temporal_and_reference_processing_transfer
+    models:
+      - training_mean
+      - terrain_ridge
+      - sentinel2_terrain_ridge
+      - sentinel2_terrain_nonlinear
+      - tessera_ridge
+      - tessera_nonlinear
+
+  diagnostics:
+    model: tessera_nonlinear
+    variables:
+      - lidar_meanH
+      - lidar_maxH
+      - lidar_stdH
+      - lidar_Cov
+      - lidar_gapFrac
+      - terrain_elevation_m
+      - terrain_slope_degrees
+    quantile_groups: 5
+
+  full_map:
+    target: lidar_canopy_shannon
+    model: tessera_nonlinear
+    map_type: five_region_cross_fitted
+    population_metric_tiles: data/interim/phase15_arran_lidar_metric_tiles
+    tessera_year: 2025
+    tessera_dataset_version: "1.0"
+    tessera_dataset_variant: vultr
+    expected_population_rows: 1106596
+    expected_tessera_tiles: 13
+    minimum_valid_fraction: 0.95
+    streamed_sources_retained: false
+
+  comparability:
+    lidarshm_commit: 46780613e77a94e6f2e3d13f0ae835817d426ac1
+    cairngorms_documented_description: Normalized Shannon diversity index of canopy; points above 1.3 m
+    lidarshm_implementation_observation: roughness_metrics_f receives the unfiltered LAS object in the inspected commit
+    status_before_followup: unresolved_documentation_implementation_mismatch

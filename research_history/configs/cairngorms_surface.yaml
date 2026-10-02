@@ -1,0 +1,100 @@
+phase21_cairngorms_surface:
+  study:
+    name: Cairngorms canopy height and surface heterogeneity
+    landscape: Cairngorms Connect
+    lidar_survey_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: "1.0"
+    tessera_dataset_variant: vultr
+    analysis_crs: EPSG:27700
+    interpretation: retrospective method-development experiment
+
+  frozen_inputs:
+    phase20_targets_path: data/processed/phase20_cairngorms_component_targets.parquet
+    phase20_targets_sha256: 78cc84136193f5c3871dc00cdf406f8d433a3a5dc679a2701e2a3dbf8b8c9342
+    chm_metrics_path: data/raw/scotland_lidar/chm/CHM_canopy_metrics_50m_new.tif
+    chm_metrics_sha256: b59d092ca330fb146a694c17ac31fcd03c7ad706c0ddccf39f3a6dc8a361caf5
+    tessera_features_path: data/interim/phase18_cairngorms_neural/summary.npy
+    tessera_features_sha256: bfcf6655a68186f70e0b9a92e54990242f8374960a336aebd66bb8f72bb19cc5
+    conventional_features_path: data/interim/phase19_cairngorms_arrays/conventional_5.npy
+    conventional_features_sha256: 490f8b2ee7487161053d53ea465ddf2ec6030670cf11257f93c8e33d55d14d34
+    row_id_path: data/interim/phase19_cairngorms_arrays/row_id.npy
+    row_id_sha256: caffc545d63074ec56c98152ea0f9dccb2ca0c109a88017720dae8cff5c0af46
+    common_valid_path: data/interim/phase19_cairngorms_arrays/common_valid.npy
+    common_valid_sha256: 79129b5aef93a26a42b8fb3afacd67cee754d705506eead36145fff40d4f2d24
+    fold_directory: data/interim/phase19_cairngorms_arrays
+    fold_sha256:
+      - 3fccb6c529c090f5bbe95f5e0ebb5dc927fc35792004f2d6cbc4192513d85375
+      - f9843c9bcd7e07438fe7eac6dc0ad5a382b75e307f9f32ef52d72f47943cc161
+      - 5cda2c9da15da45606d9f8912276dafb59e0fde16f3a46901e869ba3dc28c36f
+      - dc3ce9f2281eae4521a243fe54c326b3bc4ab022b67eb74edf5491824582f300
+      - ef04ede0efc0c184007b75b3a3145661682ebe97b696c75fac9e2022716ac875
+
+  targets:
+    primary:
+      - canopy_top_height_m
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+    height_adjusted:
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+    supplied_bands:
+      supplied_chm_max_m: chm_maxH
+      canopy_surface_cv: chm_height_cv
+      canopy_rumple: chm_rumple_norm
+    height_adjustment_predictors:
+      - mean_height_50m
+      - mean_p95_height_50m
+    spline_knots: 5
+    ridge_alpha: 10.0
+
+  quality_control:
+    minimum_valid_chm_pixels: 2000
+    maximum_flagged_fraction: 0.0
+    maximum_top_height_m: 60.0
+    maximum_surface_sd_m: 25.0
+    maximum_surface_cv: 2.0
+    maximum_surface_rcv: 5.0
+    minimum_rumple: 1.0
+    maximum_rumple: 2.0
+    minimum_test_rows_per_fold: 500
+    minimum_top_height_agreement_spearman: 0.95
+
+  evaluation:
+    folds: 5
+    seeds: [20260801, 20260802, 20260803]
+    block_size_m: 1000
+    bootstrap_replicates: 1000
+    bootstrap_seed: 20260803
+    models: [conventional, tessera, fused]
+    comparisons:
+      - [tessera, conventional]
+      - [fused, conventional]
+      - [fused, tessera]
+
+  neural:
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 512
+    maximum_epochs: 100
+    minimum_epochs: 12
+    early_stopping_patience: 12
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  interpretation_gates:
+    surface_targets:
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+    minimum_folds_with_positive_r2: 4
+    minimum_surface_targets_recovered: 3
+    minimum_surface_targets_with_added_value: 2
+    rule: Recovery requires positive held-out skill in at least four regions for at least three surface metrics. Added value requires a paired block-bootstrap RMSE interval favouring TESSERA over conventional predictors for at least two surface metrics.

@@ -1,0 +1,101 @@
+phase22_cairngorms_spatial_unet:
+  study:
+    name: Cairngorms canopy-surface heterogeneity architecture experiment
+    lidar_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: "1.0"
+    tessera_dataset_variant: vultr
+    analysis_crs: EPSG:27700
+    interpretation: retrospective method-development experiment
+
+  inputs:
+    cohort_path: data/processed/phase21_cairngorms_surface_targets.parquet
+    chm_path: data/raw/scotland_lidar/chm/Cairngorms_standard_CHM_DSM_DTM_1m_res.tif
+    patch_path: data/interim/phase18_cairngorms_neural/patch_quantized.npy
+    patch_scale_path: data/interim/phase18_cairngorms_neural/patch_scales.npy
+    patch_valid_path: data/interim/phase18_cairngorms_neural/patch_valid.npy
+    patch_row_id_path: data/interim/phase18_cairngorms_neural/row_id.npy
+    conventional_path: data/interim/phase19_cairngorms_arrays/conventional_5.npy
+    conventional_row_id_path: data/interim/phase19_cairngorms_arrays/row_id.npy
+    dense_source_directory: data/interim/cairngorms_dense_10m
+
+  targets:
+    primary:
+      - canopy_p95_height_m
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+    secondary:
+      - canopy_height_kurtosis
+    opening_threshold_m: 2.0
+    minimum_valid_pixels: 2400
+    maximum_height_m: 60.0
+    maximum_cv: 3.0
+    maximum_rcv: 5.0
+    maximum_rumple: 10.0
+
+  spatial_evaluation:
+    schemes: [balanced, regional]
+    primary_scheme: balanced
+    folds: 5
+    balance_block_size_m: 6000
+    balance_formula: "(2 * block_x + block_y) mod 5"
+    balanced_exclusion_buffer_m: 2000
+    regional_exclusion_buffer_m: 1000
+    validation_block_size_m: 1000
+    validation_fraction: 0.15
+    validation_seed: 20260804
+    metric_block_size_m: 1000
+    minimum_test_rows: 500
+
+  models:
+    scalar_names:
+      - conventional_mlp
+      - tessera_mlp_3x3
+      - tessera_mlp_5x5
+      - fused_mlp_5x5
+      - tessera_cnn_5x5
+    unet_name: tessera_unet
+    seeds: [20260804, 20260805, 20260806]
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    cnn_channels: 96
+    cnn_blocks: 3
+    cnn_head: [256, 128]
+    unet_base_channels: 24
+    unet_chip_cells: 128
+    unet_chip_stride_cells: 96
+    unet_minimum_training_targets_per_chip: 24
+    batch_size:
+      conventional_mlp: 1024
+      tessera_mlp_3x3: 1024
+      tessera_mlp_5x5: 1024
+      fused_mlp_5x5: 1024
+      tessera_cnn_5x5: 256
+      compact_unet: 2
+    maximum_epochs:
+      conventional_mlp: 80
+      tessera_mlp_3x3: 80
+      tessera_mlp_5x5: 80
+      fused_mlp_5x5: 80
+      tessera_cnn_5x5: 60
+      compact_unet: 50
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  outputs:
+    array_directory: data/interim/phase22_cairngorms_spatial_unet
+    result_directory: data/interim/phase22_cairngorms_spatial_unet_results
+    target_table: data/processed/phase22_cairngorms_surface_targets.parquet
+    prediction_table: data/processed/phase22_cairngorms_spatial_unet_predictions.parquet
+    metrics_table: outputs/tables/phase22_cairngorms_spatial_unet_metrics.csv
+    macro_table: outputs/tables/phase22_cairngorms_spatial_unet_macro.csv
+    figure: outputs/figures/phase22_cairngorms_spatial_unet.png
+    report: outputs/reports/phase22_cairngorms_spatial_unet.md
+    preparation_status: metadata/phase22_cairngorms_preparation_status.json
+    result_freeze: metadata/phase22_cairngorms_result_freeze.json
+

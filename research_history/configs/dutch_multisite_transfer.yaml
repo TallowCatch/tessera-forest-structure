@@ -1,0 +1,126 @@
+phase36_dutch_multisite_transfer:
+  study:
+    name: Dutch multi-site forest-structure transfer pilot
+    analysis_crs: EPSG:28992
+    site_source: data/external/ahn4_selection/Nature2000_NL_RDnew.shp
+    sites:
+      - name: Veluwe
+        code: veluwe
+        group: conifer
+      - name: Sallandse Heuvelrug
+        code: sallandse_heuvelrug
+        group: conifer
+      - name: Schoorlse Duinen
+        code: schoorlse_duinen
+        group: conifer
+      - name: Savelsbos
+        code: savelsbos
+        group: broadleaf
+      - name: Landgoederen Oldenzaal
+        code: landgoederen_oldenzaal
+        group: broadleaf
+      - name: Drentsche Aa-gebied
+        code: drentsche_aa
+        group: broadleaf
+
+  genus_map:
+    record: https://zenodo.org/records/13341104
+    grid: data/external/forestpaths_tree_genus/grid.gpkg
+    tile_directory: data/external/forestpaths_tree_genus/tiles
+    classes:
+      0: Larix
+      1: Picea
+      2: Pinus
+      3: Fagus
+      4: Quercus
+      5: other_needleleaf
+      6: other_broadleaf
+      7: no_trees
+    conifer_classes: [0, 1, 2, 5]
+    broadleaf_classes: [3, 4, 6]
+    minimum_tree_fraction: 0.80
+    minimum_group_fraction_among_trees: 0.80
+
+  ahn4:
+    record: https://zenodo.org/records/8422129
+    paper: https://essd.copernicus.org/articles/17/3641/2025/
+    flighttime: data/raw/ahn4/ahn4_10m_flighttime.tif
+    masks:
+      - data/raw/ahn4/ahn4_10m_mask_building_road_water.tif
+      - data/raw/ahn4/ahn4_10m_mask_powerline.tif
+      - data/raw/ahn4/ahn4_10m_NA_mask.tif
+    metrics:
+      ahn4_mean_height_m: data/raw/ahn4/ahn4_10m_mean_normalized_height.tif
+      ahn4_p95_height_m: data/raw/ahn4/ahn4_10m_perc_95_normalized_height.tif
+      ahn4_height_sd_m: data/raw/ahn4/ahn4_10m_std_normalized_height.tif
+      ahn4_height_cv: data/raw/ahn4/ahn4_10m_coeff_var_normalized_height.tif
+      ahn4_entropy: data/raw/ahn4/ahn4_10m_entropy_normalized_height.tif
+      ahn4_pulse_penetration: data/raw/ahn4/ahn4_10m_pulse_penetration_ratio.tif
+      ahn4_sigma_z: data/raw/ahn4/ahn4_10m_sigma_z.tif
+
+  population:
+    lidar_cell_m: 10
+    output_support_m: 50
+    minimum_valid_lidar_fraction: 0.95
+    minimum_mean_height_m: 10.0
+    maximum_pulse_penetration: 0.50
+    minimum_single_year_fraction: 0.95
+    minimum_rows_per_site: 250
+    maximum_rows_per_site: 5000
+    sampling_block_m: 1000
+    sampling_seed: 20260830
+
+  tessera:
+    active_representation: public_v1.0_vultr
+    dataset_version: "1.0"
+    dataset_variant: vultr
+    dimensions: 128
+    minimum_valid_pixels: 20
+    download_attempts: 8
+    retry_delay_seconds: 10
+    stream_directory: data/interim/phase36_v2_stream
+    chunk_directory: data/interim/phase36_v2_chunks
+
+  evaluation:
+    targets:
+      - ahn4_p95_height_m
+      - ahn4_height_sd_m
+      - ahn4_height_cv
+      - ahn4_entropy
+      - ahn4_pulse_penetration
+      - ahn4_sigma_z
+    target_categories:
+      canopy_height_and_dispersion:
+        - ahn4_p95_height_m
+        - ahn4_height_sd_m
+        - ahn4_height_cv
+      return_profile:
+        - ahn4_entropy
+        - ahn4_pulse_penetration
+        - ahn4_sigma_z
+    folds: 5
+    fold_block_m: 500
+    exclusion_buffer_m: 500
+    fold_seed: 20260831
+    ridge_alpha: 100.0
+    minimum_train_rows: 150
+    minimum_test_rows: 30
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260901
+
+  outputs:
+    selected_sites: data/processed/phase36_dutch_selected_sites.gpkg
+    cohort: data/processed/phase36_dutch_multisite_cohort.parquet
+    features: data/processed/phase36_dutch_multisite_tessera_v1.parquet
+    folds: data/interim/phase36_dutch_multisite_folds
+    predictions: data/processed/phase36_dutch_multisite_predictions.parquet
+    metrics: outputs/tables/phase36_dutch_multisite_metrics.csv
+    pairwise: outputs/tables/phase36_dutch_pairwise_transfer.csv
+    bootstrap: outputs/tables/phase36_dutch_scenario_bootstrap.csv
+    distance_model: outputs/tables/phase36_dutch_distance_group_diagnostic.csv
+    site_summary: outputs/tables/phase36_dutch_site_summary.csv
+    figure_directory: outputs/figures/phase36_dutch_multisite
+    report: outputs/reports/phase36_dutch_multisite_transfer.md
+    preparation_freeze: metadata/phase36_dutch_multisite_preparation.json
+    acquisition_freeze: metadata/phase36_dutch_multisite_v1_acquisition.json
+    result_freeze: metadata/phase36_dutch_multisite_result.json

@@ -1,0 +1,36 @@
+phase40_cairngorms_reference_uncertainty:
+  description: >-
+    Quantify finite-support uncertainty in Cairngorms 50 m CHM metrics using a
+    delete-one 10 m spatial-block jackknife and compare the resulting reference
+    standard errors with spatially held-out TESSERA v2 residuals.
+  inputs:
+    targets: data/processed/phase22_cairngorms_surface_targets.parquet
+    predictions: data/processed/phase29_cairngorms_v2_surface_predictions.parquet
+    height_predictions: data/processed/phase31_cairngorms_v2_height_strict_predictions.parquet
+    chm: data/raw/scotland_lidar/chm/Cairngorms_standard_CHM_DSM_DTM_1m_res.tif
+  analysis:
+    workers: 20
+    block_size_pixels: 10
+    expected_grid_pixels: 50
+    opening_threshold_m: 2.0
+    metrics:
+      - canopy_mean_height_m
+      - canopy_p95_height_m
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+      - canopy_height_kurtosis
+    prediction_variant: raw
+    prediction_version: v2
+    prediction_model_family: tessera
+    height_prediction_model: tessera_v2_mlp_5x5
+  outputs:
+    worker_directory: data/interim/phase40_reference_uncertainty_workers
+    unit_uncertainty: data/processed/phase40_cairngorms_reference_uncertainty.parquet
+    summary: outputs/tables/phase40_reference_uncertainty_summary.csv
+    fold_comparison: outputs/tables/phase40_reference_uncertainty_fold_comparison.csv
+    figure: outputs/figures/phase40_reference_uncertainty.png
+    report: outputs/reports/phase40_reference_uncertainty.md
+    result_freeze: metadata/phase40_reference_uncertainty_result.json

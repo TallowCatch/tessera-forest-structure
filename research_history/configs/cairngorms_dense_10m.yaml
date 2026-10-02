@@ -1,0 +1,118 @@
+cairngorms_dense_10m:
+  study:
+    name: Cairngorms dense forest structural heterogeneity
+    landscape: Cairngorms Connect
+    survey_year: 2023
+    analysis_crs: EPSG:27700
+    interpretation: retrospective method-development experiment
+
+  source:
+    lidar_metrics_path: data/raw/scotland_lidar/LiDAR_metrics_2.tif
+    expected_source_sha256: d9cc95fa0eb0d23a1c6d428120995f64fe4ec41fb97ebda4c1c3d7439a1f47fe
+    expected_resolution_m: 10
+    expected_band_count: 39
+    expected_shape: [4066, 4071]
+    expected_bounds_bng: [267460.0, 782910.0, 308170.0, 823570.0]
+    tessera_tile_manifest: metadata/cairngorms_dense_10m_tessera_tile_manifest.json
+
+  population:
+    output_stride_m: 10
+    structural_window_cells: 5
+    structural_support_m: 50
+    minimum_valid_lidar_cells: 20
+    minimum_mean_canopy_height_m: 10.0
+    maximum_mean_canopy_height_m: 45.0
+    maximum_mean_p95_height_m: 60.0
+    minimum_mean_canopy_cover: 0.50
+    minimum_valid_tessera_pixels: 20
+
+  targets:
+    names:
+      - mean_canopy_shannon_50m_sliding
+      - between_cell_height_sd_50m_sliding
+      - mean_gap_fraction_50m_sliding
+      - three_layer_volume_entropy_50m_sliding
+    primary: mean_canopy_shannon_50m_sliding
+    valid_ranges:
+      mean_canopy_shannon_50m_sliding: [0.0, 1.61]
+      between_cell_height_sd_50m_sliding: [0.0, 20.0]
+      mean_gap_fraction_50m_sliding: [0.0, 1.0]
+      three_layer_volume_entropy_50m_sliding: [0.0, 1.098612289]
+    profile_source_bands:
+      - lidar_vlayer_L1
+      - lidar_vlayer_L2
+      - lidar_vlayer_L3
+    profile_layer_labels:
+      - 0_to_1m
+      - 1_to_10m
+      - above_10m
+    profile_minimum_total_volume: 0.000001
+    provenance_note: The supplied five-bin Shannon band remains the primary target; the three-layer volume entropy is a separate documented diagnostic and does not reconstruct it.
+
+  tessera:
+    embedding_year: 2023
+    dataset_version: "1.0"
+    dataset_variant: vultr
+    embedding_dimensions: 128
+    patch_cells: 5
+    download_attempts: 8
+    retry_delay_seconds: 20
+    delete_source_tiles_after_alignment: true
+
+  spatial_evaluation:
+    region_count: 5
+    block_size_m: 1000
+    exclusion_buffer_m: 1000
+    validation_block_fraction: 0.15
+    validation_seed: 20260801
+    equal_block_weight: true
+
+  models:
+    names:
+      - summary_mlp
+      - residual_patch_cnn
+      - compact_unet
+    seeds: [20260801, 20260802, 20260803]
+    batch_size:
+      summary_mlp: 4096
+      residual_patch_cnn: 1024
+      compact_unet: 2
+    maximum_epochs:
+      summary_mlp: 60
+      residual_patch_cnn: 60
+      compact_unet: 50
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    dropout: 0.10
+    summary_hidden_dimensions: [256, 128]
+    residual_cnn_channels: 96
+    residual_cnn_blocks: 3
+    residual_cnn_head: [256, 128]
+    unet_base_channels: 24
+    unet_chip_cells: 128
+    unet_chip_stride_cells: 96
+    unet_minimum_training_targets_per_chip: 128
+    unet_minimum_evaluation_targets_per_chip: 1
+
+  uncertainty:
+    block_bootstrap_replicates: 1000
+    seed: 20260801
+
+  selection:
+    primary_metric: rmse
+    reference_model: summary_mlp
+    minimum_material_rmse_reduction_fraction: 0.05
+    paired_interval_must_exclude_zero: true
+    map_selected_model_even_if_gate_fails: true
+
+  outputs:
+    dense_directory: data/interim/cairngorms_dense_10m
+    result_directory: data/interim/cairngorms_dense_10m_results
+    prediction_table: data/processed/cairngorms_dense_10m_oof_predictions.parquet
+    metrics_table: outputs/tables/cairngorms_dense_10m_metrics.csv
+    pooled_metrics_table: outputs/tables/cairngorms_dense_10m_pooled_metrics.csv
+    comparisons_table: outputs/tables/cairngorms_dense_10m_comparisons.csv
+    map_directory: outputs/maps/cairngorms_dense_10m
+    result_freeze: metadata/cairngorms_dense_10m_result_freeze.json

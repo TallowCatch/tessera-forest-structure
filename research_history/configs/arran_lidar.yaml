@@ -1,0 +1,151 @@
+phase15_arran_lidar:
+  study:
+    name: Arran airborne-LiDAR replication
+    landscape_id: ARRAN
+    country: Scotland
+    boundary_source_url: https://nominatim.openstreetmap.org/search?format=geojson&q=Isle%20of%20Arran%2C%20Scotland&polygon_geojson=1&limit=1
+    expected_osm_type: relation
+    expected_osm_id: 4105750
+    expected_boundary_bounds_wgs84: [-5.3971, 55.4337, -5.0789, 55.7213]
+
+  source:
+    catalogue_api: https://api.remotesensing.data.gov.scot
+    laz_collection: scotland-gov/lidar/national-lidar-programme/laz
+    dtm_collection: scotland-gov/lidar/national-lidar-programme/dtm
+    survey_year: 2025
+    expected_crs_epsg: 27700
+    expected_point_density_per_square_metre: 10
+    expected_dtm_resolution_m: 0.5
+    source_license: Open Government Licence v3
+    user_agent: tessera-gedi-fhd/phase15 (University of Cambridge research)
+    download_attempts: 8
+    retry_delay_seconds: 15
+    minimum_free_space_after_source_download_bytes: 805306368
+
+  metric_generation:
+    implementation_reference: https://github.com/alandhyc/lidarSHM
+    lidarshm_commit: 46780613e77a94e6f2e3d13f0ae835817d426ac1
+    read_laz_directly: true
+    metric_resolution_m: 10.0
+    point_chunk_size: 2000000
+    height_normalization: official_same_capture_dtm_containing_50cm_cell
+    h_cutoff_m: 1.3
+    gap_threshold_m: 2.0
+    vci_zmax_m: 35.0
+    shannon_breaks_m: [-1.0, 2.0, 5.0, 10.0, 15.0, 35.0]
+    provider_specific_volume_metrics_enabled: false
+    provider_specific_volume_metrics_reason: national_lidar_uses_explicit_vegetation_classes_whereas_lidarshm_volume_defaults_to_class_1
+
+  sampling:
+    maximum_rows: 200000
+    seed: 20260727
+    forest_mask:
+      minimum_p95_height_m: 3.0
+      maximum_p999_height_m: 60.0
+      maximum_return_height_m: 60.0
+      minimum_canopy_cover: 0.10
+      maximum_canopy_cover: 1.0
+      maximum_canopy_shannon: 1.61
+
+  tessera:
+    embedding_year: 2025
+    dataset_version: "1.0"
+    dataset_variant: vultr
+    feature_space_reason: exact_match_to_the_cairngorms_phase14_model
+    minimum_valid_alignment_fraction: 0.95
+    download_attempts: 8
+    retry_delay_seconds: 20
+
+  conventional:
+    enabled: true
+    stac_api: https://planetarycomputer.microsoft.com/api/stac/v1
+    sentinel_2:
+      collection: sentinel-2-l2a
+      bands:
+        B02: blue
+        B03: green
+        B04: red
+        B08: nir
+        B11: swir1
+        B12: swir2
+      derived_indices: [ndvi, ndmi, nbr]
+      scenes_per_month_per_mgrs_tile: 2
+      maximum_item_cloud_cover_percent: 80
+      valid_scl_classes: [2, 4, 5, 6, 7]
+      processing_baseline_offset_dn: 1000
+      reflectance_scale: 0.0001
+      minimum_valid_observations_per_point: 6
+    topography:
+      collection: cop-dem-glo-30
+      analysis_crs: EPSG:27700
+      analysis_resolution_m: 30
+    exclude_feature_suffixes: [observation_count]
+
+  spatial_evaluation:
+    region_count: 5
+    region_seed: 20260727
+    block_size_m: 1000
+    exclusion_buffer_m: 1000
+    minimum_test_rows_per_target: 1000
+    minimum_training_rows_per_target: 5000
+
+  models:
+    ridge_alpha: 100.0
+    coordinate_polynomial_degree: 2
+    nonlinear:
+      learning_rate: 0.05
+      max_iter: 120
+      max_leaf_nodes: 31
+      min_samples_leaf: 100
+      l2_regularization: 10.0
+      random_state: 20260727
+
+  targets:
+    primary: lidar_canopy_shannon
+    representative:
+      - lidar_canopy_shannon
+      - lidar_vci_2m
+      - lidar_vci_5m
+      - lidar_vci_10m
+      - lidar_vci_15m
+      - lidar_Cov
+      - lidar_gapFrac
+      - lidar_ePAI
+      - lidar_meanH
+      - lidar_maxH
+      - lidar_stdH
+    nonlinear:
+      - lidar_canopy_shannon
+      - lidar_vci_2m
+      - lidar_Cov
+      - lidar_meanH
+    height_adjustment_predictors:
+      - lidar_meanH
+      - lidar_maxH
+      - lidar_p_95
+      - lidar_stdH
+    valid_ranges:
+      lidar_canopy_shannon: [0.0, 1.61]
+      lidar_vci_2m: [0.0, 1.0]
+      lidar_vci_5m: [0.0, 1.0]
+      lidar_vci_10m: [0.0, 1.0]
+      lidar_vci_15m: [0.0, 1.0]
+      lidar_Cov: [0.0, 1.0]
+      lidar_gapFrac: [0.0, 1.5]
+      lidar_ePAI: [0.0, 20.0]
+      lidar_meanH: [1.3, 60.0]
+      lidar_maxH: [3.0, 60.0]
+      lidar_stdH: [0.0, 30.0]
+
+  cross_landscape:
+    source_landscape: Cairngorms Connect
+    source_year: 2023
+    target_landscape: Arran
+    target_year: 2025
+    interpretation: geographic_and_temporal_transfer
+    source_sample: data/processed/phase14_scotland_lidar_sample.parquet
+    source_tessera: data/processed/phase14_scotland_tessera.parquet
+
+  uncertainty:
+    block_bootstrap_replicates: 2000
+    seed: 20260727

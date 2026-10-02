@@ -1,0 +1,80 @@
+study:
+  name: AHN3-to-AHN4 temporal transfer in Dutch forests
+  analysis_crs: EPSG:28992
+  site_table: results/tables/dutch_forest_sites.csv
+  site_boundaries: data/external/ahn4_selection/Nature2000_NL_RDnew.shp
+  genus_tiles: data/external/forestpaths_tree_genus/tiles
+  reference_raster: data/raw/ahn4/ahn4_10m_mean_normalized_height.tif
+
+support:
+  lidar_cell_m: 10
+  unit_m: 50
+  minimum_tree_fraction: 0.80
+  minimum_group_fraction_among_trees: 0.80
+  minimum_valid_metric_fraction: 0.95
+  minimum_single_year_fraction: 0.95
+  minimum_baseline_mean_height_m: 10.0
+  maximum_baseline_pulse_penetration: 0.50
+  minimum_units_per_site: 250
+  maximum_units_per_site: 5000
+  sampling_block_m: 1000
+  sampling_seed: 20260916
+
+ahn3:
+  record_id: 6421381
+  acquisition_envelopes_url: https://basisdata.nl/hwh-ahn/AUX/omhullen/AHN3_pseudo_omhullen.gpkg
+  minimum_tessera_year: 2017
+  maximum_tessera_year: 2019
+  metrics:
+    p95_height_m: ahn3_10m_perc_95_normalized_height.tif
+    height_sd_m: ahn3_10m_std_normalized_height.tif
+    height_cv: ahn3_10m_coeff_var_normalized_height.tif
+    entropy: ahn3_10m_entropy_normalized_height.tif
+    pulse_penetration: ahn3_10m_pulse_penetration_ratio.tif
+    sigma_z: ahn3_10m_sigma_z.tif
+  screening_metrics:
+    mean_height_m: ahn3_10m_mean_normalized_height.tif
+
+ahn4:
+  record_id: 8422129
+  flighttime: data/raw/ahn4/ahn4_10m_flighttime.tif
+  local_metrics:
+    mean_height_m: data/raw/ahn4/ahn4_10m_mean_normalized_height.tif
+    pulse_penetration: data/raw/ahn4/ahn4_10m_pulse_penetration_ratio.tif
+  metrics:
+    p95_height_m: ahn4_10m_perc_95_normalized_height.tif
+    height_sd_m: ahn4_10m_std_normalized_height.tif
+    height_cv: ahn4_10m_coeff_var_normalized_height.tif
+    entropy: ahn4_10m_entropy_normalized_height.tif
+    pulse_penetration: ahn4_10m_pulse_penetration_ratio.tif
+    sigma_z: ahn4_10m_sigma_z.tif
+
+tessera:
+  dataset_version: "1.0"
+  dataset_variant: vultr
+  dimensions: 128
+  minimum_valid_pixels: 20
+
+validation:
+  folds: 5
+  fold_block_m: 500
+  exclusion_buffer_m: 500
+  fold_seed: 20260916
+  minimum_train_rows: 150
+  minimum_test_rows: 30
+  ridge_alpha: 100.0
+  bootstrap_replicates: 2000
+  bootstrap_seed: 20260917
+
+outputs:
+  work_directory: data/interim/dutch_temporal_transfer
+  cohort: data/processed/dutch_temporal_transfer_cohort.parquet
+  tessera_rows: data/processed/dutch_temporal_transfer_tessera_rows.parquet
+  tessera_features: data/processed/dutch_temporal_transfer_tessera_features.parquet
+  predictions: data/processed/dutch_temporal_transfer_predictions.parquet
+  fold_metrics: results/tables/dutch_temporal_transfer_fold_metrics.csv
+  summary: results/tables/dutch_temporal_transfer_summary.csv
+  bootstrap: results/tables/dutch_temporal_transfer_bootstrap.csv
+  site_inventory: results/tables/dutch_temporal_transfer_sites.csv
+  report: results/reports/dutch_temporal_transfer.md
+  manifest: provenance/dutch_temporal_transfer_manifest.json

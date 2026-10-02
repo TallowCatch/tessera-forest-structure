@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>uk.ac.cam.tessera-gedi-fhd.phase16-scotland</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/nice</string>
+    <string>-n</string>
+    <string>10</string>
+    <string>/Users/ameerfiras/miniforge3/envs/tessera-crop-label-audit/bin/python</string>
+    <string>/Users/ameerfiras/ICCS/tessera-gedi-fhd/scripts/run_scotland_evidence.py</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/ameerfiras/ICCS/tessera-gedi-fhd</string>
+  <key>StandardOutPath</key>
+  <string>/Users/ameerfiras/ICCS/tessera-gedi-fhd/outputs/reports/phase16_scotland_background.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/ameerfiras/ICCS/tessera-gedi-fhd/outputs/reports/phase16_scotland_background.error.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONUNBUFFERED</key>
+    <string>1</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

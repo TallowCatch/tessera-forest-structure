@@ -1,0 +1,100 @@
+phase27_tessera_v2:
+  representation:
+    name: experimental TESSERA v2
+    channels: 128
+    pixel_size_m: 10.0
+    tile_step_degrees: 0.1
+    bucket: us-west-2.opendata.source.coop
+    prefix: tessera/tessera/npy/v2
+    supplied_loader: references/tessera_v2/fetch_v2_patch_aneesh_20260811.py
+    supplied_loader_sha256: f5d26913ff5f9c10dbba2ee131506997413b597149fac339c8337004604cb7a9
+
+  savelsbos:
+    year: 2021
+    analysis_crs: EPSG:28992
+    cohort: data/processed/phase26_ahn4_deciduous_cohort.parquet
+    x_column: rd_x
+    y_column: rd_y
+    pixel_mask_column: broadleaf_pixel_mask
+    minimum_valid_pixels: 20
+    v1_features: data/processed/phase26_ahn4_tessera.parquet
+    v2_features: data/processed/phase27_savelsbos_tessera_v2.parquet
+    conventional: data/processed/phase26_ahn4_conventional.parquet
+    folds: data/interim/phase26_ahn4_folds
+    predictions: data/processed/phase27_savelsbos_v2_predictions.parquet
+    metrics: outputs/tables/phase27_savelsbos_v2_metrics.csv
+    bootstrap: outputs/tables/phase27_savelsbos_v2_bootstrap.csv
+    comparison: outputs/tables/phase27_savelsbos_v1_v2_comparison.csv
+    report: outputs/reports/phase27_savelsbos_v2.md
+    result_freeze: metadata/phase27_savelsbos_v2_result_freeze.json
+
+  cairngorms:
+    year: 2023
+    analysis_crs: EPSG:27700
+    cohort: data/processed/phase22_cairngorms_surface_targets.parquet
+    corrected_cohort: data/processed/phase25_cairngorms_corrected_lidar_targets.parquet
+    x_column: bng_x
+    y_column: bng_y
+    context_cells: 5
+    minimum_valid_pixels: 20
+    v1_features: data/interim/phase25_cairngorms_corrected_lidar/tessera.npy
+    v2_patch_directory: data/interim/phase27_cairngorms_v2
+    v2_features: data/interim/phase27_cairngorms_v2/tessera.npy
+    conventional: data/interim/phase25_cairngorms_corrected_lidar/conventional.npy
+    folds: data/interim/phase25_cairngorms_corrected_lidar
+    results: data/interim/phase27_cairngorms_v2_results
+    v1_predictions: data/processed/phase25_cairngorms_corrected_lidar_predictions.parquet
+    predictions: data/processed/phase27_cairngorms_v2_predictions.parquet
+    metrics: outputs/tables/phase27_cairngorms_v2_metrics.csv
+    bootstrap: outputs/tables/phase27_cairngorms_v2_bootstrap.csv
+    comparison: outputs/tables/phase27_cairngorms_v1_v2_comparison.csv
+    report: outputs/reports/phase27_cairngorms_v2.md
+    result_freeze: metadata/phase27_cairngorms_v2_result_freeze.json
+
+  acquisition:
+    download_attempts: 8
+    retry_delay_seconds: 10
+    minimum_free_space_after_download_bytes: 536870912
+    chunk_directory: data/interim/phase27_tessera_v2_chunks
+    stream_directory: data/interim/phase27_tessera_v2_stream
+
+  savelsbos_evaluation:
+    folds: 5
+    ridge_alpha: 100.0
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260813
+    minimum_train_rows: 150
+    minimum_test_rows: 30
+    targets:
+      - ahn4_p95_height_m
+      - ahn4_height_sd_m
+      - ahn4_height_cv
+      - ahn4_entropy
+      - ahn4_pulse_penetration
+      - ahn4_sigma_z
+    height_predictors:
+      - ahn4_mean_height_m
+      - ahn4_p95_height_m
+    height_adjustment_spline_knots: 5
+    height_adjustment_ridge_alpha: 10.0
+
+  cairngorms_evaluation:
+    folds: 5
+    seeds: [20260804, 20260805, 20260806]
+    models: [tessera, fused]
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260813
+    targets:
+      - lidar_height_cv_50m
+      - lidar_rcv_50m
+      - lidar_rms_50m
+      - lidar_canopy_shannon_50m
+    adjusted_suffix: _height_adjusted
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 512
+    maximum_epochs: 100
+    minimum_epochs: 12
+    early_stopping_patience: 12
+    learning_rate: 0.001
+    weight_decay: 0.0001

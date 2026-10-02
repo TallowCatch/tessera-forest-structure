@@ -1,0 +1,91 @@
+phase17_cairngorms_heterogeneity:
+  study:
+    name: Cairngorms forest structural heterogeneity
+    landscape: Cairngorms Connect
+    survey_year: 2023
+    analysis_crs: EPSG:27700
+
+  source:
+    lidar_metrics_path: data/raw/scotland_lidar/LiDAR_metrics_2.tif
+    expected_source_sha256: d9cc95fa0eb0d23a1c6d428120995f64fe4ec41fb97ebda4c1c3d7439a1f47fe
+    expected_resolution_m: 10
+    expected_band_count: 39
+    expected_bounds_bng: [267460.0, 782910.0, 308170.0, 823570.0]
+
+  population:
+    patch_cells: 5
+    patch_size_m: 50
+    minimum_valid_cells: 20
+    minimum_mean_canopy_height_m: 10.0
+    minimum_mean_canopy_cover: 0.50
+    maximum_mean_canopy_height_m: 45.0
+    maximum_p95_height_m: 60.0
+
+  tessera:
+    embedding_year: 2023
+    dataset_version: "1.0"
+    dataset_variant: vultr
+    minimum_valid_pixels_per_patch: 20
+    download_attempts: 8
+    retry_delay_seconds: 20
+    minimum_free_space_after_download_bytes: 536870912
+
+  spatial_evaluation:
+    region_count: 5
+    block_size_m: 1000
+    exclusion_buffer_m: 1000
+    minimum_test_rows_per_target: 500
+    minimum_training_rows_per_target: 3000
+
+  models:
+    ridge_alpha: 100.0
+    coordinate_polynomial_degree: 2
+    nonlinear:
+      learning_rate: 0.05
+      max_iter: 120
+      max_leaf_nodes: 31
+      min_samples_leaf: 60
+      l2_regularization: 10.0
+      random_state: 20260728
+    mlp:
+      enabled: true
+      hidden_layer_sizes: [128, 64]
+      alpha: 0.001
+      batch_size: 512
+      learning_rate_init: 0.001
+      max_iter: 80
+      early_stopping: true
+      validation_fraction: 0.12
+      n_iter_no_change: 8
+      random_state: 20260728
+
+  targets:
+    primary: mean_canopy_shannon_50m
+    representative:
+      - mean_canopy_shannon_50m
+      - between_cell_height_sd_50m
+      - mean_gap_fraction_50m
+      - mean_within_cell_height_sd_50m
+    nonlinear:
+      - mean_canopy_shannon_50m
+      - between_cell_height_sd_50m
+      - mean_gap_fraction_50m
+    height_adjustment_predictors:
+      - mean_height_50m
+      - mean_p95_height_50m
+      - mean_cover_50m
+      - mean_within_cell_height_sd_50m
+    valid_ranges:
+      mean_canopy_shannon_50m: [0.0, 1.61]
+      between_cell_height_sd_50m: [0.0, 20.0]
+      mean_gap_fraction_50m: [0.0, 1.5]
+      mean_within_cell_height_sd_50m: [0.0, 30.0]
+
+  uncertainty:
+    block_bootstrap_replicates: 1000
+    seed: 20260728
+
+  success:
+    primary_r2_target: 0.70
+    minimum_positive_fold_count: 5
+    minimum_rmse_reduction_over_central_fraction: 0.10

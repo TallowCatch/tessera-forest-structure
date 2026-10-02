@@ -27,6 +27,7 @@ PROJECT_DIRECTORIES = {
     "docs",
     "examples",
     "provenance",
+    "research_history",
     "results",
     "src",
     "tests",

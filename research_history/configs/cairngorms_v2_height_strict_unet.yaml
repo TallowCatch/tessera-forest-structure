@@ -1,0 +1,68 @@
+phase31_cairngorms_v2_height_strict_unet:
+  study:
+    name: Strict-ownership Cairngorms TESSERA v2 canopy-height rerun
+    lidar_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: experimental_v2
+    analysis_crs: EPSG:27700
+    interpretation: frozen within-Cairngorms spatial evaluation
+
+  frozen_inputs:
+    phase30_array_directory: data/interim/phase30_cairngorms_v2_height
+    phase30_mlp_result_directory: data/interim/phase30_cairngorms_v2_height_results
+    phase30_predictions: data/processed/phase30_cairngorms_v2_height_predictions.parquet
+    phase30_result_freeze: metadata/phase30_cairngorms_v2_height_result_freeze.json
+
+  targets:
+    names:
+      - canopy_mean_height_m
+      - canopy_p95_height_m
+    primary: canopy_p95_height_m
+    units: m
+
+  evaluation:
+    folds: 5
+    seeds: [20260804, 20260805, 20260806]
+    fixed_comparison_model: tessera_v2_mlp_5x5
+    rerun_model: tessera_v2_unet_strict
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260817
+    opening_groups:
+      closed_maximum: 0.05
+      intermediate_maximum: 0.20
+    success:
+      minimum_primary_rmse_reduction_fraction: 0.02
+      require_bootstrap_ci_below_zero: true
+
+  model:
+    unet_base_channels: 24
+    input_channels: 129
+    output_channels: 2
+    chip_cells: 128
+    chip_stride_cells: 96
+    training_chip_minimum_targets: 1
+    batch_size: 2
+    maximum_epochs: 50
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  strict_corrections:
+    assign_each_target_to_one_chip: true
+    prefer_most_central_containing_chip: true
+    supervise_each_target_once_per_epoch: true
+    normalize_loss_by_fixed_expected_batch_weight: true
+    enforce_minimum_selected_epoch: true
+    refit_on_complete_training_fold: true
+
+  outputs:
+    result_directory: data/interim/phase31_cairngorms_v2_height_strict_results
+    predictions: data/processed/phase31_cairngorms_v2_height_strict_predictions.parquet
+    fold_metrics: outputs/tables/phase31_cairngorms_v2_height_strict_fold_metrics.csv
+    macro_metrics: outputs/tables/phase31_cairngorms_v2_height_strict_macro.csv
+    comparison: outputs/tables/phase31_cairngorms_v2_height_strict_comparison.csv
+    opening_diagnostic: outputs/tables/phase31_cairngorms_v2_height_strict_opening_diagnostic.csv
+    figure: outputs/figures/phase31_cairngorms_v2_height_strict.png
+    report: outputs/reports/phase31_cairngorms_v2_height_strict.md
+    result_freeze: metadata/phase31_cairngorms_v2_height_strict_result_freeze.json

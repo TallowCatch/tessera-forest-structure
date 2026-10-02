@@ -1,0 +1,124 @@
+phase18_cairngorms_spatial_heads:
+  study:
+    name: Cairngorms multi-target spatial-head evaluation
+    landscape: Cairngorms Connect
+    survey_year: 2023
+    analysis_crs: EPSG:27700
+
+  frozen_inputs:
+    targets_path: data/processed/phase17_cairngorms_50m_targets.parquet
+    targets_sha256: 7ea4925c30ddff2445289bf2d0b892e1c146e43eeb639ca5783d34c317256b72
+    tessera_summaries_path: data/processed/phase17_cairngorms_50m_tessera_context.parquet
+    tessera_summaries_sha256: 4cae3fbb9cb7468b2a718d788298c7b88df50678ef058eda50a3434bc2113d95
+    tessera_manifest_path: metadata/phase17_cairngorms_tessera_manifest.json
+    tessera_manifest_sha256: 35240c87cf16789a97990156b19b0a67edf4654eb20942b950b14a6d998087c8
+    lidar_metrics_path: data/raw/scotland_lidar/LiDAR_metrics_2.tif
+    lidar_metrics_sha256: d9cc95fa0eb0d23a1c6d428120995f64fe4ec41fb97ebda4c1c3d7439a1f47fe
+
+  target_panel:
+    raw:
+      - mean_canopy_shannon_50m
+      - between_cell_height_sd_50m
+      - mean_within_cell_height_sd_50m
+      - mean_gap_fraction_50m
+      - mean_height_50m
+      - mean_p95_height_50m
+      - mean_cover_50m
+    height_adjusted_name: mean_canopy_shannon_50m_height_adjusted
+    height_adjustment_predictors:
+      - mean_height_50m
+      - mean_p95_height_50m
+      - mean_cover_50m
+      - mean_within_cell_height_sd_50m
+    valid_ranges:
+      mean_canopy_shannon_50m: [0.0, 1.61]
+      between_cell_height_sd_50m: [0.0, 20.0]
+      mean_within_cell_height_sd_50m: [0.0, 30.0]
+      mean_gap_fraction_50m: [0.0, 1.5]
+      mean_height_50m: [10.0, 45.0]
+      mean_p95_height_50m: [0.0, 60.0]
+      mean_cover_50m: [0.5, 1.0]
+
+  tessera_patches:
+    patch_cells: 5
+    embedding_dimensions: 128
+    embedding_year: 2023
+    dataset_version: "1.0"
+    dataset_variant: vultr
+    minimum_valid_pixels_per_patch: 20
+    download_attempts: 8
+    retry_delay_seconds: 20
+    minimum_free_space_after_download_bytes: 536870912
+
+  conventional:
+    enabled: true
+    spatial_support: centre_10m_pixel
+    stac_api: https://planetarycomputer.microsoft.com/api/stac/v1
+    sentinel_2:
+      collection: sentinel-2-l2a
+      bands:
+        B02: blue
+        B03: green
+        B04: red
+        B08: nir
+        B11: swir1
+        B12: swir2
+      derived_indices: [ndvi, ndmi, nbr]
+      scenes_per_month_per_mgrs_tile: 2
+      maximum_item_cloud_cover_percent: 80
+      valid_scl_classes: [2, 4, 5, 6, 7]
+      processing_baseline_offset_dn: 1000
+      reflectance_scale: 0.0001
+      minimum_valid_observations_per_point: 6
+    sentinel_1:
+      collection: sentinel-1-rtc
+      polarizations: [vv, vh]
+      scenes_per_month_per_orbit_state: 2
+      minimum_valid_observations_per_point_per_state: 6
+    topography:
+      collection: cop-dem-glo-30
+      analysis_crs: EPSG:27700
+      analysis_resolution_m: 30
+    exclude_feature_suffixes: [observation_count]
+
+  spatial_evaluation:
+    region_count: 5
+    block_size_m: 1000
+    exclusion_buffer_m: 1000
+    validation_block_fraction: 0.15
+    minimum_test_rows: 500
+    minimum_training_rows: 3000
+    seed: 20260729
+
+  baseline_models:
+    ridge_alpha: 100.0
+    nonlinear:
+      learning_rate: 0.05
+      max_iter: 120
+      max_leaf_nodes: 31
+      min_samples_leaf: 60
+      l2_regularization: 10.0
+      random_state: 20260729
+
+  neural:
+    python: /Users/ameerfiras/miniforge3/envs/rednet-ml/bin/python
+    seeds: [20260729, 20260730]
+    batch_size: 512
+    maximum_epochs: 100
+    early_stopping_patience: 12
+    minimum_epochs: 12
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    dropout: 0.10
+    mlp_hidden_dimensions: [256, 128]
+    cnn_channels: [64, 64, 64]
+
+  uncertainty:
+    block_bootstrap_replicates: 1000
+    seed: 20260729
+
+  success:
+    primary_target: mean_canopy_shannon_50m
+    desired_primary_r2: 0.70
+    minimum_positive_r2_folds: 5
+    cnn_must_improve_over_summary_mlp: true

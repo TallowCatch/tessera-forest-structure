@@ -1,0 +1,74 @@
+phase29_cairngorms_v2_surface:
+  study:
+    name: Frozen TESSERA v2 Cairngorms canopy-surface rerun
+    lidar_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: experimental_v2
+    analysis_crs: EPSG:27700
+    interpretation: frozen within-Cairngorms spatial evaluation
+
+  representation:
+    channels: 128
+    patch_cells: 5
+    minimum_valid_patch_cells: 20
+    supplied_loader: references/tessera_v2/fetch_v2_patch_aneesh_20260811.py
+    supplied_loader_sha256: f5d26913ff5f9c10dbba2ee131506997413b597149fac339c8337004604cb7a9
+
+  frozen_inputs:
+    target_table: data/processed/phase22_cairngorms_surface_targets.parquet
+    raw_source_arrays: data/interim/phase22_cairngorms_spatial_unet
+    raw_v1_predictions: data/processed/phase22_cairngorms_spatial_unet_predictions.parquet
+    adjusted_source_arrays: data/interim/phase23_cairngorms_height_adjusted
+    adjusted_v1_predictions: data/processed/phase23_cairngorms_height_adjusted_predictions.parquet
+    dense_v2_directory: data/interim/phase28_cairngorms_v2_dense
+    dense_v2_manifest: metadata/phase28_cairngorms_v2_dense_acquisition.json
+
+  targets:
+    raw:
+      - canopy_p95_height_m
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+      - canopy_height_kurtosis
+    height_adjusted:
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+      - canopy_height_kurtosis
+
+  evaluation:
+    folds: 5
+    seeds: [20260804, 20260805, 20260806]
+    models: [tessera, fused]
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260815
+    comparison: v2_minus_v1
+
+  model:
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 1024
+    maximum_epochs: 80
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  outputs:
+    raw_array_directory: data/interim/phase29_cairngorms_v2_surface_raw
+    adjusted_array_directory: data/interim/phase29_cairngorms_v2_surface_adjusted
+    raw_result_directory: data/interim/phase29_cairngorms_v2_surface_raw_results
+    adjusted_result_directory: data/interim/phase29_cairngorms_v2_surface_adjusted_results
+    preparation_status: metadata/phase29_cairngorms_v2_surface_preparation.json
+    predictions: data/processed/phase29_cairngorms_v2_surface_predictions.parquet
+    fold_metrics: outputs/tables/phase29_cairngorms_v2_surface_fold_metrics.csv
+    macro_metrics: outputs/tables/phase29_cairngorms_v2_surface_macro.csv
+    comparison: outputs/tables/phase29_cairngorms_v2_surface_v1_v2_comparison.csv
+    figure: outputs/figures/phase29_cairngorms_v2_surface.png
+    report: outputs/reports/phase29_cairngorms_v2_surface.md
+    result_freeze: metadata/phase29_cairngorms_v2_surface_result_freeze.json
+

@@ -1,0 +1,67 @@
+phase23_cairngorms_height_adjusted:
+  study:
+    name: Cairngorms height-adjusted canopy-surface heterogeneity
+    lidar_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: "1.0"
+    tessera_dataset_variant: vultr
+    interpretation: retrospective within-landscape spatial validation
+
+  frozen_inputs:
+    target_table_path: data/processed/phase22_cairngorms_surface_targets.parquet
+    source_fold_directory: data/interim/phase22_cairngorms_spatial_unet/folds
+    spatial_block_path: data/interim/phase22_cairngorms_spatial_unet/spatial_block.npy
+    tessera_source_path: data/interim/phase18_cairngorms_neural/summary.npy
+    tessera_row_id_path: data/interim/phase18_cairngorms_neural/row_id.npy
+    conventional_source_path: data/interim/phase19_cairngorms_arrays/conventional_5.npy
+    conventional_row_id_path: data/interim/phase19_cairngorms_arrays/row_id.npy
+    tessera_features_path: data/interim/phase23_cairngorms_height_adjusted/tessera.npy
+    conventional_features_path: data/interim/phase23_cairngorms_height_adjusted/conventional.npy
+
+  targets:
+    names:
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+      - canopy_height_kurtosis
+    height_predictors:
+      - canopy_mean_height_m
+      - canopy_p95_height_m
+    spline_knots: 5
+    ridge_alpha: 10.0
+
+  evaluation:
+    folds: 5
+    models: [conventional, tessera, fused]
+    seeds: [20260804, 20260805, 20260806]
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260804
+    comparisons:
+      - [tessera, conventional]
+      - [fused, tessera]
+      - [fused, conventional]
+
+  neural:
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 512
+    maximum_epochs: 100
+    minimum_epochs: 12
+    early_stopping_patience: 12
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  outputs:
+    array_directory: data/interim/phase23_cairngorms_height_adjusted
+    result_directory: data/interim/phase23_cairngorms_height_adjusted_results
+    preparation_status: metadata/phase23_cairngorms_preparation_status.json
+    prediction_table: data/processed/phase23_cairngorms_height_adjusted_predictions.parquet
+    fold_metrics_table: outputs/tables/phase23_cairngorms_height_adjusted_metrics.csv
+    macro_table: outputs/tables/phase23_cairngorms_height_adjusted_macro.csv
+    bootstrap_table: outputs/tables/phase23_cairngorms_height_adjusted_bootstrap.csv
+    figure: outputs/figures/phase23_cairngorms_height_adjusted.png
+    report: outputs/reports/phase23_cairngorms_height_adjusted.md
+    result_freeze: metadata/phase23_cairngorms_result_freeze.json
+

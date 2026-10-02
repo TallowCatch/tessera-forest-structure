@@ -1,0 +1,931 @@
+project:
+  name: tessera-gedi-fhd
+  status: paper_complete_eight_site_evaluation
+
+target:
+  mission: GEDI
+  product: GEDI02_B
+  product_version: "003"
+  cmr_collection_concept_id: C3974616135-LPCLOUD
+  variable: fhd_normal
+  primary_year: 2024
+  footprint_diameter_m_approx: 25
+  version_reason: V003_corrects_errors_affecting_fhd_and_improves_geolocation
+
+predictors:
+  source: TESSERA
+  dataset_version: "1.0"
+  dataset_variant: vultr
+  embedding_year: 2024
+  embedding_dimension: 128
+  pixel_size_m_approx: 10
+  never_mix_versions_or_variants: true
+  selection_reason: v1.1_cambridge_has_zero_of_eight_required_tiles_v1.0_vultr_has_all_eight
+  rejected_unavailable_selection: "1.1/cambridge"
+
+sites:
+  extent: neon_aop_priority_1_flight_box
+  development:
+    - SOAP
+    - TEAK
+  locked_transfer_test: BART
+  aop_reference_year: 2024
+  flight_boundary_source: https://www.neonscience.org/sites/default/files/AOP_flightBoxes_0.zip
+  priority_1_bboxes_wgs84:
+    SOAP: [-119.2919464457, 37.0142750706, -119.1767316705, 37.1042875314]
+    TEAK: [-119.0962033206, 36.9514910125, -118.9715140645, 37.0427798538]
+    BART: [-71.3342560121, 43.9919475560, -71.2094969977, 44.0819645961]
+
+quality:
+  require_l2b_quality_flag_rel3: 1
+  require_degrade_flag: 0
+  filter_missing_fhd: true
+  primary_beams: full_power_from_hdf_group_metadata
+  full_power_selection_rule: group_description_equals_Full_power_beam
+  observed_full_power_beam_names_2024_sample: [BEAM0101, BEAM0110, BEAM1000, BEAM1011]
+  sensitivity_analysis:
+    - all_beams
+    - nighttime_only
+    - full_power_and_nighttime
+    - sensitivity_at_least_0.98
+
+forest_mask:
+  source: Annual_NLCD_Collection_1_2
+  year: 2024
+  forest_classes: [41, 42, 43]
+  minimum_footprint_forest_fraction: 0.8
+  sensitivity_forest_fraction: 0.5
+
+alignment:
+  primary: area_weighted_mean_embedding_over_25m_circular_footprint
+  compare_center_pixel: true
+  compare_gaussian_weighting: true
+  use_local_projected_crs: true
+  minimum_valid_footprint_fraction: 0.95
+  gaussian_sigma_m: 6.25
+
+validation:
+  prohibit_random_pixel_split: true
+  within_site: buffered_spatial_block_cross_validation
+  spatial_block_rule: empirical_variogram_range_rounded_up_minimum_1km
+  exclusion_buffer_m: 500
+  track_sensitivity_test: leave_one_orbit_track_out
+  transfer: train_soap_teak_test_bart
+  external_reference: neon_2024_als_simulated_gedi_fhd
+  metrics:
+    - r2
+    - rmse
+    - mae
+    - spearman_r
+
+phase3:
+  development_sites: [SOAP, TEAK]
+  target: fhd_normal
+  feature_prefix: tessera_area_
+  variogram:
+    model: spherical
+    bin_width_m: 250
+    maximum_lag_rule: half_maximum_pair_distance_rounded_down_to_bin
+    minimum_pairs_per_bin: 30
+    fit_weighting: square_root_pair_count
+    range_across_sites: maximum_practical_range
+  folds:
+    projected_crs: EPSG:5070
+    block_width_rule: variogram_range_rounded_up_to_1km
+    minimum_block_width_m: 1000
+    grid_origin_m: [0, 0]
+    number_of_folds: 5
+    site_stratified: true
+    assignment: greedy_with_cross_site_fold_balance
+    exclusion_buffer_m: 500
+  models:
+    training_mean: {}
+    tessera_ridge:
+      scale_features_inside_training_fold: true
+      alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+      tuning: nested_buffered_spatial_folds
+    tessera_hist_gradient_boosting:
+      tuning: fixed_initial_diagnostic
+      learning_rate: 0.05
+      max_iter: 300
+      max_leaf_nodes: 15
+      min_samples_leaf: 20
+      l2_regularization: 0.1
+  uncertainty:
+    method: site_stratified_spatial_block_bootstrap
+    replicates: 2000
+    random_seed: 20260717
+
+conventional_predictors:
+  stac_api: https://planetarycomputer.microsoft.com/api/stac/v1
+  year: 2024
+  point_sampling: containing_pixel_at_gedi_center
+  temporal_statistics: [p10, median, p90]
+  sentinel_2:
+    collection: sentinel-2-l2a
+    bands:
+      B02: blue
+      B03: green
+      B04: red
+      B08: nir
+      B11: swir1
+      B12: swir2
+    derived_indices: [ndvi, ndmi, nbr]
+    scenes_per_month_per_mgrs_tile: 2
+    maximum_item_cloud_cover_percent: 80
+    valid_scl_classes: [2, 4, 5, 6, 7]
+    processing_baseline_offset_dn: 1000
+    reflectance_scale: 0.0001
+    minimum_valid_observations_per_point: 6
+  sentinel_1:
+    collection: sentinel-1-rtc
+    polarizations: [vv, vh]
+    scenes_per_month_per_orbit_state: 2
+    separate_orbit_states: true
+    convert_linear_power_to_db: true
+    minimum_valid_observations_per_point_per_state: 6
+  topography:
+    collection: cop-dem-glo-30
+    source_resolution_m_approx: 30
+    analysis_crs: EPSG:5070
+    analysis_resolution_m: 30
+    features: [elevation, slope_degrees, aspect_sin, aspect_cos]
+  storage:
+    stream_cloud_optimized_geotiff_windows: true
+    retain_source_scenes: false
+
+phase3_extended_experiments:
+  outer_folds: spatial-folds-0b7df79521fd
+  exclusion_buffer_m: 500
+  ridge_alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+  tune_each_feature_set_with_nested_spatial_folds: true
+  feature_sets:
+    terrain: [terrain_elevation_m, terrain_slope_degrees, terrain_aspect_sin, terrain_aspect_cos]
+    sentinel_topography: all_conventional_predictor_features
+    tessera_area: tessera_area_000_to_127
+    tessera_area_topography: tessera_area_plus_terrain
+    tessera_center: tessera_center_000_to_127
+    tessera_gaussian: tessera_gaussian_000_to_127
+  alignment_sensitivity: [center, area, gaussian]
+  label_efficiency:
+    model: tessera_area_ridge
+    fixed_alpha_from_phase3_nested_tuning: 100.0
+    training_block_fractions: [0.1, 0.25, 0.5, 1.0]
+    replicates_below_full_fraction: 20
+    site_stratified: true
+    minimum_blocks_per_site: 1
+    random_seed: 20260717
+  uncertainty:
+    method: site_stratified_spatial_block_bootstrap
+    replicates: 2000
+    random_seed: 20260717
+  model_selection: deferred_until_soap_teak_transfer_results_are_frozen
+
+phase4_development_transfer:
+  directions:
+    - train_site: SOAP
+      test_site: TEAK
+    - train_site: TEAK
+      test_site: SOAP
+  models:
+    - training_mean
+    - terrain_ridge
+    - sentinel_topography_ridge
+    - tessera_area_ridge
+    - tessera_area_topography_ridge
+    - tessera_hist_gradient_boosting
+  ridge_alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+  ridge_tuning: buffered_spatial_folds_within_source_site
+  exclusion_buffer_m: 500
+  selected_pipeline_rule:
+    eligible: [tessera_area_ridge, tessera_area_topography_ridge]
+    criterion: lowest_worst_direction_rmse
+    practical_tie_threshold_rmse: 0.005
+    tie_breaker: prefer_tessera_area_ridge
+  final_combined_alpha_rule: lowest_mean_nested_validation_rmse_from_phase3_extended_tuning
+  bart_predictors_may_be_built_only_after_selection_freeze: true
+  bart_targets_remain_locked: true
+
+phase4_locked_bart_evaluation:
+  development_transfer_freeze_id: phase4-transfer-841220e4a99a
+  bart_predictor_freeze_id: conventional-bart-b1e589a8601c
+  bart_predictor_recipe_validated_equal_to_development: true
+  training_sites: [SOAP, TEAK]
+  locked_test_site: BART
+  selected_primary_pipeline:
+    model: tessera_area_topography_ridge
+    alpha: 100.0
+    features: area_weighted_tessera_128_plus_terrain_4
+  comparison_models:
+    - training_mean
+    - terrain_ridge
+    - sentinel_topography_ridge
+    - tessera_area_ridge
+    - tessera_area_topography_ridge
+    - tessera_hist_gradient_boosting
+  ridge_alpha_source: combined_development_alphas_in_frozen_transfer_manifest
+  nonlinear_parameters_source: frozen_phase3_config
+  train_on_all_development_rows: true
+  tuning_or_model_selection_on_bart: prohibited
+  primary_metrics: [r2, rmse, mae, spearman_r, mean_bias]
+  uncertainty:
+    method: bart_spatial_block_bootstrap
+    spatial_block_width_m: 7000
+    replicates: 2000
+    random_seed: 20260717
+  predictor_recipe_must_equal_development_recipe: true
+  predictor_extraction_must_not_read_target: true
+  target_access_allowed_only_after_predictor_freeze_validation: true
+  target_access_execution: one_freeze_producing_run_after_target_free_preflight
+  report_all_predeclared_models_regardless_of_result: true
+
+phase4_posthoc_findings:
+  locked_evaluation_freeze_id: phase4-bart-eval-e34dc4da0157
+  primary_pipeline_passed_transfer_gate: false
+  primary_r2: -2.7172796213791077
+  primary_rmse: 0.7685553121717605
+  training_mean_r2: -0.07464201432114059
+  training_mean_rmse: 0.4132324529030436
+  bart_elevation_entirely_outside_development_range: true
+  sentinel_topography_baseline_valid_for_scientific_comparison: false
+  sentinel_invalidity_reason: acquisition_observation_count_was_erroneously_used_as_a_predictor
+  wall_to_wall_mapping_gate_passed: false
+
+phase4_corrected_sentinel_sensitivity:
+  status: posthoc_correction_after_locked_bart_evaluation
+  model: sentinel_topography_ridge
+  predictor_table_columns_retained_for_quality_control: true
+  excluded_model_feature_suffixes: [observation_count]
+  exclusion_reason: acquisition_counts_are_sampling_diagnostics_not_environmental_predictors
+  expected_excluded_columns:
+    - s1_ascending_valid_observation_count
+    - s1_descending_valid_observation_count
+    - s2_valid_observation_count
+  expected_model_feature_count: 43
+  development_folds: spatial-folds-0b7df79521fd
+  development_outer_validation: buffered_spatial_folds
+  ridge_alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+  ridge_tuning: nested_buffered_spatial_folds
+  exclusion_buffer_m: 500
+  transfer_directions: [SOAP_to_TEAK, TEAK_to_SOAP]
+  bart_training_sites: [SOAP, TEAK]
+  bart_alpha_source: corrected_development_nested_tuning_only
+  tuning_or_model_selection_on_bart: prohibited
+  interpretation: posthoc_sensitivity_not_replacement_confirmatory_result
+  uncertainty:
+    method: spatial_block_bootstrap
+    replicates: 2000
+    random_seed: 20260717
+  result:
+    freeze_id: sentinel-correction-8222d2ca3d35
+    development_r2: 0.3267652838514876
+    development_rmse: 0.4333158043829531
+    bart_r2: -2.7266293922692464
+    bart_rmse: 0.7695212474813982
+    original_bart_rmse_with_count_diagnostics: 7.950833936664078
+    numerical_extrapolation_defect_fixed: true
+    geographic_transfer_gate_passed: false
+
+phase4_r2_generalization_audit:
+  locked_evaluation_freeze_id: phase4-bart-eval-e34dc4da0157
+  r2_point_estimate_valid: true
+  manual_formula: one_minus_residual_sum_of_squares_over_total_sum_of_squares
+  maximum_manual_stored_r2_difference: 2.220446049250313e-16
+  maximum_recreated_primary_prediction_difference: 0.0
+  exact_target_join_rows: 1026
+  development_bart_shot_overlap: 0
+  all_four_spatial_blocks_have_negative_primary_r2: true
+  all_three_orbit_tracks_have_negative_primary_r2: true
+  uncertainty_limitations:
+    spatial_blocks: 4
+    orbit_track_passes: 3
+    acquisition_dates: 3
+    bart_variogram_practical_range_m_posthoc: 10500
+    bart_variogram_range_hit_fit_upper_bound: true
+  valid_scope: performance_on_1026_quality_filtered_bart_gedi_shots_from_three_2024_passes
+  invalid_scope: precise_wall_to_wall_or_all_dates_bart_population_uncertainty
+
+phase5_bart_local_validation:
+  status: posthoc_after_locked_cross_region_evaluation
+  purpose: test_within_bart_cross_pass_interpolation_not_cross_region_transfer
+  target: fhd_normal
+  rows: 1026
+  outer_split: leave_one_orbit_reference_ground_track_acquisition_date_out
+  expected_passes: 3
+  exclusion_buffer_m: 500
+  tuning_on_bart: prohibited
+  ridge_alphas_from_development:
+    terrain_ridge: 0.01
+    sentinel_topography_ridge_corrected: 100.0
+    tessera_area_ridge: 100.0
+    tessera_area_topography_ridge: 100.0
+  corrected_sentinel_excluded_suffixes: [observation_count]
+  nonlinear_parameters_from_phase3: true
+  models:
+    - training_mean
+    - terrain_ridge
+    - sentinel_topography_ridge_corrected
+    - tessera_area_ridge
+    - tessera_area_topography_ridge
+    - tessera_hist_gradient_boosting
+  metrics: [r2, rmse, mae, spearman_r, mean_bias]
+  uncertainty:
+    primary: report_each_held_out_pass
+    confidence_interval: not_reported_only_three_independent_pass_units
+  interpretation_limits:
+    - posthoc_bart_analysis
+    - only_three_2024_acquisition_passes
+    - does_not_repair_failed_soap_teak_to_bart_transfer
+    - does_not_establish_wall_to_wall_or_cross_year_generalization
+  result:
+    freeze_id: phase5-bart-local-fec55993c7be
+    pooled_tessera_area_topography_ridge_r2: 0.02080389176262898
+    pooled_tessera_area_topography_ridge_rmse: 0.39445489756880175
+    pooled_terrain_ridge_rmse: 0.3954277739783935
+    pass_specific_tessera_area_topography_ridge_r2:
+      - -0.08984559298843853
+      - -0.15355332969224378
+      - 0.4342882967216062
+    interpretation: weak_local_skill_no_material_gain_over_terrain_and_not_robust_across_passes
+
+phase5_age_and_stand_development:
+  chronological_stand_age_status: unavailable_at_exact_gedi_footprints
+  disturbance_history:
+    source: LANDFIRE_Annual_Disturbance
+    years: [1999, 2024]
+    endpoint: https://lfps.usgs.gov/arcgis/rest/services/Landfire_Disturbance
+    extraction: streamed_site_exports_sampled_at_frozen_gedi_centres
+    retain_source_rasters: false
+    valid_claim: years_since_latest_recorded_disturbance_since_1999
+    invalid_claim: biological_or_stand_age
+  field_stand_development:
+    source: NEON_DP1.10098.001
+    variables: [stem_diameter, height, basal_area, stem_density]
+    site_campaigns:
+      SOAP: nearest_2023_campaign
+      TEAK: 2024_campaign
+      BART: 2024_campaign
+    valid_claim: independent_field_measured_stand_structure_or_development
+    invalid_claim: chronological_age_without_documented_establishment_year
+    access: requires_NEON_TOKEN
+  result:
+    disturbance_freeze_id: phase5-disturbance-e7ce697866ed
+    disturbance_analysis_freeze_id: phase5-disturbance-analysis-a30b7f8ae03f
+    recorded_disturbance_rows: 1524
+    total_rows: 3063
+    local_soap_teak_rmse_range_across_reportable_recency_groups: [0.318314, 0.410534]
+    conclusion: no_obvious_recent_disturbance_error_collapse_in_soap_teak
+
+phase5_neon_external_validation:
+  lidar_product: DP1.30003.001
+  field_structure_product: DP1.10098.001
+  lidar_months:
+    SOAP: 2024-06
+    TEAK: 2024-06
+    BART: 2024-08
+  tiles_per_site: 6
+  footprint_edge_buffer_m: 20
+  one_source_tile_at_a_time: true
+  disk_reserve_gb: 2
+  token_environment_variable: NEON_TOKEN
+  preflight_status: authenticated_manifest_frozen
+  manifest_freeze_id: phase5-neon-manifest-e334ba01aeb5
+  simulator_status: passed_synthetic_executable_and_directional_fhd_gate
+  simulator_smoke_freeze_id: phase5-gedi-simulator-smoke-14a27be0cd62
+  prohibited_substitute: hand_written_lidar_height_bin_entropy_presented_as_gedi_fhd
+  cross_sensor_calibration:
+    protocol_status: frozen_after_first_SOAP_pilot_before_remaining_development_and_all_BART_lidar
+    pilot_site: SOAP
+    pilot_selection_order: 1
+    raw_identity_gate: failed
+    development_sites: [SOAP, TEAK]
+    calibration: ordinary_least_squares_affine_simulated_fhd_to_gedi_fhd_normal
+    validation: leave_one_complete_NEON_tile_out
+    development_gate:
+      - calibrated_cross_validated_rmse_below_training_fold_mean_rmse
+      - pooled_cross_validated_r2_above_zero
+    locked_test_site: BART
+    tuning_or_refitting_on_BART: prohibited
+    result:
+      freeze_id: phase5-neon-lidar-calibration-334b24c26b86
+      development_rows: 295
+      development_tiles: 12
+      cross_validated_rmse: 0.4585879447726401
+      training_mean_baseline_rmse: 0.5834440546382116
+      cross_validated_r2: 0.3317433238733404
+      final_intercept: -0.9636251300992048
+      final_slope: 0.8055292394281146
+  locked_bart_lidar_result:
+    freeze_id: phase5-neon-lidar-bart-a164d4ab4027
+    rows: 233
+    tiles: 6
+    calibrated_lidar_vs_gedi:
+      r2: 0.102341
+      rmse: 0.432699
+      pearson_r: 0.397410
+      spearman_r: 0.383541
+    primary_tessera_vs_calibrated_lidar:
+      r2: -15.669406
+      rmse: 0.708538
+      mean_bias: -0.645875
+      pearson_r: 0.464564
+      spearman_r: 0.422048
+    interpretation: rank_signal_with_severe_absolute_site_bias_mapping_gate_closed
+  field_structure_result:
+    freeze_id: phase5-neon-field-structure-47fce7ba3be3
+    eligible_plots: 35
+    primary_proxy: live_tree_height_q90_minus_q10_m
+    proxy_is_measured_fhd: false
+    bart_plots: 16
+    bart_primary_pearson_r: 0.030462
+    bart_primary_spearman_r: 0.091176
+    plots_within_100m_of_selected_lidar_footprint:
+      SOAP: 0
+      TEAK: 0
+      BART: 2
+    interpretation: negative_supporting_field_check_not_footprint_level_FHD_validation
+
+baselines:
+  - training_mean
+  - topography_only
+  - annual_sentinel_1_sentinel_2_summaries_plus_topography
+  - tessera_ridge
+  - tessera_gradient_boosting
+  - tessera_plus_topography
+
+phase5_bart_few_shot_adaptation:
+  status: posthoc_protocol_frozen_after_zero_shot_and_local_bart_results
+  locked_zero_shot_result_must_remain_unchanged: true
+  outer_split_freeze_id: phase5-bart-local-fec55993c7be
+  outer_split: leave_one_orbit_reference_ground_track_acquisition_date_out
+  exclusion_buffer_m: 500
+  feature_set: area_weighted_tessera_128_plus_terrain_4
+  ridge_alpha_from_development: 100.0
+  label_budgets: [10, 25, 50, 100, all]
+  repetitions_per_finite_budget: 20
+  sampling: randomized_round_robin_across_1km_epsg5070_cells
+  random_seed: 20260717
+  methods:
+    - frozen_source
+    - target_training_mean
+    - source_intercept_correction
+    - source_affine_correction
+    - target_only_ridge
+    - equal_domain_weighted_source_plus_target_ridge
+  success_gate:
+    - median_pooled_r2_above_zero
+    - median_pooled_rmse_below_target_training_mean_at_same_budget
+  interpretation:
+    - posthoc_domain_adaptation_not_zero_shot_generalization
+    - only_three_independent_outer_passes
+    - no_wall_to_wall_mapping_claim
+  result:
+    freeze_id: phase5-bart-few-shot-5c3067b8a7ec
+    prediction_rows: 498636
+    finite_budget_recovery_gate_passed: false
+    all_label_target_only_ridge:
+      pooled_r2: 0.02080389176262898
+      pooled_rmse: 0.39445489756880175
+      positive_passes: 1
+      total_passes: 3
+    all_label_equal_domain_weighted_ridge:
+      pooled_r2: 0.0219609623163319
+      pooled_rmse: 0.3942217741664116
+      positive_passes: 1
+      total_passes: 3
+    interpretation: no_few_shot_recovery_and_all_label_pooled_skill_not_pass_consistent
+
+phase5_bart_unsupervised_coral:
+  status: posthoc_protocol_frozen_before_coral_execution
+  locked_zero_shot_result_must_remain_unchanged: true
+  method: linear_correlation_alignment
+  source_sites: [SOAP, TEAK]
+  unlabeled_target_site: BART
+  feature_set: area_weighted_tessera_128_plus_terrain_4
+  source_standardization: true
+  covariance_regularization: 0.001
+  ridge_alpha_from_development: 100.0
+  target_features_available_transductively: true
+  target_labels_used_for_alignment_or_training: false
+  comparison: frozen_source_tessera_area_topography_ridge
+  success_gate:
+    - bart_r2_above_zero
+    - bart_rmse_below_frozen_source_rmse
+  interpretation:
+    - posthoc_unsupervised_domain_adaptation
+    - one_target_site_is_not_general_domain_generalization
+  result:
+    prediction_freeze_id: phase5-bart-coral-predictions-8e33a7e84457
+    evaluation_freeze_id: phase5-bart-coral-evaluation-32951de229fe
+    covariance_distance_fraction_remaining: 0.0056175411133371385
+    bart_r2: -0.5943572955563039
+    bart_rmse: 0.5033329246869587
+    bart_pearson_r: 0.1212798060160022
+    bart_spearman_r: 0.149514394057674
+    gate_passed: false
+    interpretation: feature_moment_alignment_does_not_restore_predictive_relationship
+
+phase6_multisite_leave_one_site_out:
+  status: posthoc_complete
+  scientific_role: symmetric_domain_generalization_diagnostic_after_locked_bart_failure
+  target: fhd_normal
+  sites: [SOAP, TEAK, BART]
+  outer_split: leave_one_complete_site_out
+  outer_folds:
+    - train_sites: [TEAK, BART]
+      test_site: SOAP
+    - train_sites: [SOAP, BART]
+      test_site: TEAK
+    - train_sites: [SOAP, TEAK]
+      test_site: BART
+  target_site_labels_used_for_scaling_tuning_or_training: false
+  inner_tuning:
+    split: reciprocal_leave_one_training_site_out
+    criterion: lowest_worst_inner_validation_site_rmse
+    tie_breaker: lowest_alpha
+    alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+  outer_training_weighting: equal_total_weight_per_training_site
+  models:
+    - training_mean
+    - terrain_ridge
+    - tessera_area_ridge
+    - tessera_area_topography_ridge
+  feature_sets:
+    terrain_ridge: terrain_4
+    tessera_area_ridge: area_weighted_tessera_128
+    tessera_area_topography_ridge: area_weighted_tessera_128_plus_terrain_4
+  metrics: [r2, rmse, mae, pearson_r, spearman_r, mean_bias]
+  aggregation:
+    - site_specific
+    - macro_mean_across_three_sites
+    - pooled_out_of_site_predictions
+  primary_model: tessera_area_topography_ridge
+  success_gate:
+    - primary_r2_above_zero_on_every_held_out_site
+    - primary_rmse_below_training_mean_on_every_held_out_site
+    - primary_macro_rmse_below_terrain_ridge_macro_rmse
+  interpretation_limits:
+    - posthoc_after_bart_outcomes_were_opened
+    - only_three_sites_and_two_training_domains_per_outer_fold
+    - site_level_performance_is_primary_pooled_metrics_are_secondary
+    - does_not_establish_continental_or_global_transfer
+    - original_locked_bart_result_remains_unchanged
+  result:
+    freeze_id: phase6-multisite-loso-2bec653b4802
+    prediction_rows: 12252
+    generalization_gate_passed: false
+    primary_model_site_metrics:
+      SOAP: {r2: -0.10125406261207326, rmse: 0.55169458097033, spearman_r: 0.6515506956062014}
+      TEAK: {r2: -0.1703312865675901, rmse: 0.49262157888681674, spearman_r: 0.5529868420761117}
+      BART: {r2: -2.6847204599493257, rmse: 0.7651820722301022, spearman_r: 0.13406189254154904}
+    primary_macro_rmse: 0.6031660773624162
+    training_mean_macro_rmse: 0.5220933445574957
+    strongest_learned_comparator: tessera_area_ridge
+    tessera_area_ridge_macro_rmse: 0.5235476289926553
+    tessera_area_ridge_positive_r2_sites: [TEAK]
+    interpretation: useful_western_rank_signal_but_no_consistent_absolute_or_cross_region_generalization
+
+phase7_site_expansion:
+  status: complete
+  purpose: prospective_geographic_replication_and_expanded_domain_generalization
+  original_seen_sites: [SOAP, TEAK, BART]
+  candidate_sites:
+    [ABBY, DELA, GRSM, HARV, JERC, MLBS, NIWO, ORNL, OSBS, SCBI, SERC, STEI, TALL, UNDE, WREF, YELL]
+  selected_expansion_sites: [HARV, ORNL, OSBS, TALL, NIWO, WREF, UNDE]
+  selection_used_fhd_values_or_distributions: false
+  selection_evidence:
+    boundary: official_neon_priority_1_flight_box
+    minimum_2024_gedi_v3_intersecting_granules: 4
+    minimum_annual_nlcd_2024_forest_fraction_in_flight_box: 0.30
+    require_complete_tessera_1_0_vultr_2024_tile_inventory: true
+    geographic_rule: include_one_near_region_control_and_maximize_additional_neon_domains
+  selected_site_roles:
+    HARV: northeast_near_region_control_for_bart
+    ORNL: appalachian_deciduous_forest
+    OSBS: southeastern_pine_and_savanna
+    TALL: southern_mixed_forest
+    NIWO: southern_rockies_subalpine_forest
+    WREF: pacific_northwest_conifer_forest
+    UNDE: great_lakes_mixed_forest
+  acquisition:
+    target: GEDI02_B_003_fhd_normal
+    year: 2024
+    quality_and_forest_filters_identical_to_original_freeze: true
+    minimum_primary_rows_per_site: 100
+    minimum_occupied_1km_cells_per_site: 3
+    minimum_viable_expansion_sites: 5
+    viability_may_not_use_model_performance: true
+  tessera_alignment:
+    release: 1.0/vultr/2024
+    method: area_weighted_mean_over_25m_circular_footprint
+    stream_one_site_at_a_time: true
+    delete_expansion_embedding_tiles_after_alignment: true
+    never_mix_versions_or_variants: true
+  prospective_external_evaluation:
+    training_sites: [SOAP, TEAK, BART]
+    untouched_test_sites: [HARV, ORNL, OSBS, TALL, NIWO, WREF, UNDE]
+    primary_model: tessera_area_ridge
+    model_selection_reason: strongest_learned_phase6_comparator_and_terrain_harmed_transfer
+    alpha_selection: lowest_worst_original_site_loso_rmse_using_original_sites_only
+    alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+    equal_total_training_weight_per_original_site: true
+    expansion_target_labels_used_before_prediction_freeze: false
+    baseline: equal_mean_of_original_site_target_means
+    primary_reporting: site_specific_then_macro
+    success_gate:
+      - positive_r2_on_majority_of_viable_expansion_sites
+      - rmse_below_training_mean_on_majority_of_viable_expansion_sites
+      - macro_rmse_below_training_mean_macro_rmse
+  expanded_nested_loso:
+    timing: only_after_prospective_predictions_are_frozen_and_evaluated
+    sites: original_plus_all_viable_expansion_sites
+    outer_split: leave_one_complete_site_out
+    inner_tuning: leave_one_training_site_out
+    inner_selection: lowest_worst_validation_site_rmse_then_mean_rmse_then_lowest_alpha
+    equal_total_weight_per_training_site: true
+    primary_model: tessera_area_ridge
+    baseline: equal_mean_of_training_site_target_means
+    target_site_labels_used_for_scaling_tuning_or_training: false
+  interpretation_limits:
+    - all_sites_share_gedi_as_the_target_source
+    - neon_flight_boxes_define_geographic_domains_not_labels
+    - expansion_does_not_add_airborne_lidar_validation_at_every_site
+    - original_locked_bart_result_remains_unchanged
+  result:
+    site_selection_freeze_id: phase7-site-selection-45a1c40b6111
+    gedi_freeze_id: phase7-gedi-v3-020c6c80b39f
+    tessera_alignment_id: phase7-tessera-align-6ab0ed696e57
+    selected_expansion_sites: [HARV, ORNL, OSBS, TALL, NIWO, WREF, UNDE]
+    viable_expansion_sites: [HARV, ORNL, TALL, WREF, UNDE]
+    nonviable_sites_below_frozen_100_row_threshold:
+      OSBS: 54
+      NIWO: 80
+    expansion_rows: 7121
+    prospective_external:
+      prediction_freeze_id: phase7-prospective-predictions-a04c5743506e
+      evaluation_freeze_id: phase7-prospective-evaluation-d424d39c22bd
+      selected_alpha_from_original_sites_only: 1000.0
+      positive_r2_sites: []
+      rmse_below_original_site_mean_sites: [WREF]
+      tessera_macro_rmse: 0.515349125858646
+      original_site_mean_macro_rmse: 0.4142094612019389
+      gate_passed: false
+    expanded_nested_loso:
+      freeze_id: phase7-expanded-loso-c519234aacb9
+      sites: [BART, HARV, ORNL, SOAP, TALL, TEAK, UNDE, WREF]
+      rows: 10184
+      positive_r2_sites: [ORNL, TALL]
+      rmse_below_training_mean_sites: [BART, HARV, ORNL, SOAP, TALL, TEAK, UNDE]
+      tessera_macro_rmse: 0.4254767410558533
+      training_mean_macro_rmse: 0.4375685523154402
+      gate_passed: false
+    interpretation: broader_training_improves_average_rmse_but_not_consistent_site_level_absolute_skill
+
+phase8_paper_analysis:
+  status: complete
+  timing: posthoc_after_phase7_targets_were_opened
+  purpose:
+    - fair_eight_site_conventional_baseline_comparison
+    - quantify_fhd_dependence_on_canopy_height
+    - diagnose_geographic_domain_shift
+  sites: [BART, HARV, ORNL, SOAP, TALL, TEAK, UNDE, WREF]
+  target: GEDI02_B_003_fhd_normal
+  outer_validation: leave_one_complete_site_out
+  inner_tuning: leave_one_training_site_out
+  equal_total_weight_per_training_site: true
+  ridge_alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+  feature_sets:
+    terrain_ridge:
+      - terrain_elevation_m
+      - terrain_slope_degrees
+      - terrain_aspect_sin
+      - terrain_aspect_cos
+    sentinel_topography_ridge: 27_sentinel2_summaries_plus_4_terrain_features
+    tessera_area_ridge: tessera_area_000_to_127
+  prohibited_model_feature_suffixes: [observation_count]
+  expected_observation_count_columns:
+    - s1_valid_observation_count
+    - s2_valid_observation_count
+  canopy_height_diagnostic:
+    variable: elev_highestreturn_minus_elev_lowestmode
+    formula: elev_highestreturn - elev_lowestmode
+    role: explanatory_GEDI_diagnostic_not_wall_to_wall_predictor
+    analyses:
+      - within_site_pearson_and_spearman
+      - within_site_centered_correlation
+      - nested_leave_one_site_out_height_only_ridge
+      - fhd_distribution_by_height_quintile
+  domain_shift_diagnostic:
+    exploratory: true
+    outcomes: [loso_rmse, loso_r2, absolute_mean_bias]
+    shifts:
+      - fhd_mean_shift
+      - terrain_standardized_centroid_distance
+      - tessera_standardized_centroid_distance
+      - nlcd_forest_composition_distance
+    inference: descriptive_site_level_spearman_with_exact_permutation_p_values
+  uncertainty:
+    macro_metric_bootstrap_unit: site
+    bootstrap_replicates: 10000
+    random_seed: 20260718
+  interpretation_rules:
+    - report_site_level_and_macro_metrics_as_primary
+    - pooled_metrics_are_secondary
+    - do_not_claim_fhd_is_independent_of_canopy_height
+    - do_not_claim_wall_to_wall_transfer_when_site_r2_is_inconsistent
+    - preserve_all_phase1_to_phase7_freezes
+  result:
+    conventional_predictor_freeze_id: phase8-conventional-all-sites-76e18e223431
+    fair_baseline_freeze_id: phase8-fair-baselines-73389d0061c4
+    radar_sensitivity_freeze_id: phase8-radar-sensitivity-18d0cd03d09a
+    fhd_height_freeze_id: phase8-fhd-height-5c824db80f49
+    domain_shift_freeze_id: phase8-domain-shift-0203c5db7c8d
+    fair_eight_site_macro:
+      sentinel2_topography_rmse: 0.4136971299568272
+      sentinel2_topography_r2: -0.1622002270160422
+      sentinel2_topography_spearman_r: 0.3287036866453646
+      tessera_rmse: 0.4254767410558533
+      tessera_r2: -0.2969657076769445
+      tessera_spearman_r: 0.4460625815768219
+      tessera_positive_r2_sites: [ORNL, TALL]
+      sentinel2_positive_r2_sites: [HARV, ORNL, TALL]
+    fhd_height:
+      macro_height_only_r2: 0.661
+      macro_height_only_rmse: 0.222
+      pooled_within_site_centered_spearman_r: 0.885
+    domain_shift:
+      tessera_rmse_vs_fhd_mean_shift_spearman_r: 0.7619047619047621
+      exact_permutation_p: 0.03675595238095238
+    wall_to_wall_mapping_gate_passed: false
+    interpretation: useful_rank_signal_without_reliable_absolute_cross_site_calibration
+
+phase9_habitat_conditioned_transfer:
+  status: complete
+  purpose: test_whether_ecological_matching_improves_complete_site_fhd_transfer
+  timing:
+    current_eight_sites: exploratory_after_outcomes_were_opened
+    new_target_sites: freeze_habitat_design_before_target_outcomes_are_acquired
+  current_sites: [BART, HARV, ORNL, SOAP, TALL, TEAK, UNDE, WREF]
+  habitat_source:
+    product: LANDFIRE_2024_Existing_Vegetation_Type_CONUS
+    image_service: https://lfps.usgs.gov/arcgis/rest/services/Landfire_LF2024/LF2024_EVT_CONUS/ImageServer
+    native_resolution_m: 30
+    role: ecological_stratification_and_source_selection_only
+    prohibited_role: independent_ground_truth_for_fhd
+    retain_lifeform: Tree
+    hierarchy:
+      evt_phys: EVT_PHYS
+      evt_group: EVT_GP_N
+      evt_system: EVT_NAME
+    primary_hierarchy: evt_phys
+  similarity:
+    population: forest_pixels_within_official_neon_priority_1_flight_box
+    metric: Jensen_Shannon_distance_base_2
+    target_outcomes_used: false
+  exploratory_transfer:
+    outer_split: leave_one_complete_site_out
+    all_source_comparator: all_seven_available_training_sites
+    habitat_matched_sources: five_nearest_training_sites
+    habitat_hierarchies: [evt_phys, evt_group, evt_system]
+    primary_hierarchy: evt_phys
+    model: tessera_area_ridge
+    features: tessera_area_000_to_127
+    inner_tuning: leave_one_selected_training_site_out
+    alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+    equal_total_weight_per_training_site: true
+    target_site_labels_used_for_scaling_tuning_or_training: false
+    primary_comparison: paired_site_rmse_nearest5_evt_phys_minus_all_sources
+    bootstrap_unit: site
+    bootstrap_replicates: 10000
+    random_seed: 20260720
+  terrain_sensitivity:
+    primary_population: all_quality_filtered_footprints
+    strata_degrees: [0, 15, 30, inf]
+    exclusion_sensitivity: terrain_slope_degrees_greater_than_30
+  prospective_extension:
+    source_pool: current_eight_sites
+    candidate_pool: phase7_unselected_outcome_unseen_sites_passing_original_feasibility_rules
+    acquire_target_outcomes_only_after_habitat_profile_and_source_selection_freeze: true
+    primary_transfer_comparison: all_eight_sources_vs_five_habitat_nearest_sources
+    target_sites: [ABBY, GRSM, JERC, MLBS, SCBI, SERC, STEI]
+    gedi_acquisition:
+      product: GEDI02_B_003
+      year: 2024
+      stream_one_checksum_verified_granule_at_a_time: true
+      delete_full_hdf_after_exact_spatial_subset: true
+      filters_identical_to_original_freeze: true
+      minimum_primary_rows_per_site: 100
+      minimum_occupied_1km_cells_per_site: 3
+      minimum_viable_target_sites: 5
+      viability_may_not_use_fhd_distribution_or_model_performance: true
+    tessera_alignment:
+      dataset_version: 1.0
+      dataset_variant: vultr
+      year: 2024
+      method: area_weighted_mean_over_25m_circular_footprint
+      stream_one_site_at_a_time: true
+      delete_source_tiles_after_site_alignment: true
+    locked_prediction:
+      target_fhd_columns_read_before_prediction_freeze: false
+      primary: all_eight_sources_vs_nearest5_evt_phys
+      secondary: nearest5_evt_group
+      model: tessera_area_ridge
+      tune_alpha_using_selected_source_sites_only: true
+  interpretation_limits:
+    - current_eight_site_result_is_exploratory
+    - landfire_is_a_modelled_habitat_map_not_fhd_reference_truth
+    - success_requires_replication_on_new_target_sites
+    - habitat_matching_must_not_use_target_fhd_values_or_distributions
+  result:
+    habitat_freeze_id: phase9-habitat-988b5bd794e3
+    exploratory_transfer_freeze_id: phase9-habitat-transfer-79adcfad137c
+    profiled_site_count: 19
+    current_footprints: 10184
+    prospective_target_sites: [ABBY, GRSM, JERC, MLBS, SCBI, SERC, STEI]
+    prospective_gedi_freeze_id: phase9-prospective-gedi-v3-e878ccf39848
+    prospective_tessera_alignment_id: phase9-prospective-tessera-88415df86f26
+    prospective_prediction_id: phase9-prospective-prediction-7df9abe5d9fa
+    prospective_viable_sites: [ABBY, GRSM, JERC, MLBS, SCBI, STEI]
+    prospective_aligned_rows: 5142
+    prospective_target_outcomes_opened_before_prediction_freeze: false
+    prospective_evaluation_id: phase9-prospective-evaluation-54b536a75d1e
+    prospective_target_outcomes_opened_after_prediction_freeze: true
+    prospective_primary_gate_passed: true
+    prospective_primary_mean_delta_rmse: -0.016603295560847497
+    prospective_primary_bootstrap_95: [-0.027733071702732336, -0.005909655576431573]
+    prospective_primary_sites_improved: 5
+    prospective_primary_sites_total: 6
+    prospective_all_source_macro_rmse: 0.3771242213351725
+    prospective_phys_matched_macro_rmse: 0.36052092577432493
+    prospective_all_source_macro_r2: 0.14513761120629706
+    prospective_phys_matched_macro_r2: 0.21115390640168497
+    matched_size_control_freeze_id: phase9-matched-size-control-c97a504f8ab2
+    matched_size_source_subset_count: 56
+    matched_size_sites_better_than_median_subset: 6
+    matched_size_mean_frozen_subset_rank: 15.666666666666666
+    matched_size_random_subset_monte_carlo_p: 0.035829641703582965
+    prospective_conventional_predictor_freeze_id: phase9-prospective-conventional-34611989d30c
+    prospective_conventional_comparison_freeze_id: phase9-prospective-conventional-comparison-f6ee1ca4415a
+    prospective_all_source_sentinel_macro_rmse: 0.4287188036754299
+    prospective_phys_matched_sentinel_macro_rmse: 0.440083197853046
+    prospective_phys_tessera_minus_sentinel_mean_delta_rmse: -0.07956227207872106
+    prospective_phys_tessera_minus_sentinel_bootstrap_95: [-0.13654743499047675, -0.03300812560373522]
+    prospective_phys_tessera_lower_rmse_sites: 6
+    all_source_macro:
+      rmse: 0.4254767410558533
+      r2: -0.2969657076769445
+      spearman_r: 0.4460625815768219
+    nearest5_evt_phys_macro:
+      rmse: 0.39345658977434605
+      r2: -0.07151021072968584
+      spearman_r: 0.4525276959795044
+    primary_paired_rmse:
+      mean_delta: -0.03202015128150726
+      sites_improved: 5
+      sites_total: 8
+      bootstrap_95: [-0.07612925295706088, 0.0013950148447764224]
+    nearest5_evt_group_secondary:
+      macro_rmse: 0.39484577029773865
+      sites_improved: 7
+      mean_delta_rmse: -0.0306309707581146
+      bootstrap_95: [-0.0545544847500598, -0.0105984119758946]
+    interpretation: prospective_support_for_habitat_matching_with_post_hoc_mechanism_and_conventional_controls
+
+phase11_height_context_transfer:
+  status: protocol_frozen_before_execution
+  purpose: test_a_deployable_height_mediated_tessera_to_fhd_model
+  sites: [ABBY, BART, GRSM, HARV, JERC, MLBS, ORNL, SCBI, SOAP, STEI, TALL, TEAK, UNDE, WREF]
+  rows: 15326
+  targets:
+    height: elev_highestreturn_minus_elev_lowestmode
+    fhd: fhd_normal
+  validation:
+    strict_outer_split: leave_one_complete_site_out
+    inner_selection: leave_one_training_site_out
+    equal_total_weight_per_training_site: true
+    target_site_fhd_or_height_used_for_training_or_selection: false
+  footprint_height_gate:
+    features: tessera_area_000_to_127
+    model: standardized_weighted_ridge
+    alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0]
+    selection: minimum_worst_inner_site_rmse_then_macro_rmse_then_alpha
+    pass_conditions:
+      - macro_r2_above_zero
+      - macro_rmse_below_equal_site_training_mean
+  context:
+    window_widths_m: [30, 70, 150]
+    summaries: [per_dimension_mean, per_dimension_standard_deviation, footprint_minus_window_mean]
+    select_window_using_inner_sites_only: true
+    stream_one_site_at_a_time: true
+    delete_raw_stream_after_compact_feature_freeze: true
+  models:
+    M0: direct_tessera_to_fhd_ridge
+    M1: tessera_to_predicted_height_to_source_height_curve
+    M2: M1_plus_cross_fitted_tessera_residual
+    M3: separate_regional_track_assisted_evaluation
+    M4: post_freeze_alos2_palsar2_lband_ablation
+  interpretation:
+    - M1_maps_the_height_related_component_of_standard_gedi_fhd
+    - M2_must_improve_on_M1_to_support_information_beyond_predicted_height
+    - M3_uses_target_region_gedi_and_is_not_zero_label_transfer
+    - stop_before_fhd_chain_if_footprint_height_gate_fails

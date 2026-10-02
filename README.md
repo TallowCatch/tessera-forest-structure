@@ -13,6 +13,7 @@ The analyses cover:
 - training-only adjustment for canopy height;
 - direct transfer between Scotland and the Netherlands;
 - transfer among 20 Dutch forests;
+- AHN3-to-AHN4 temporal transfer among eligible Dutch forest units;
 - relative spatial ranking and sparse local-reference assistance; and
 - finite-support uncertainty in LiDAR-derived measurements.
 
@@ -30,7 +31,7 @@ python -m pip install -e ".[dev]"
 tessera-study list
 tessera-study verify
 tessera-study demo
-python -m pytest -q
+python -m pytest -q tests/test_demo.py tests/test_release_package.py tests/test_repository_structure.py
 ```
 
 The deterministic demo uses labelled synthetic data and completes in seconds.
@@ -52,6 +53,7 @@ analysis scope and expected outputs without modifying existing results.
 ```text
 src/                 reusable metrics, modelling helpers, and command-line tools
 workflows/           analysis configurations grouped by scientific question
+research_history/     original experiment scripts, configurations, and tests
 results/             curated tables, figures, and reconstruction diagnostics
 examples/            deterministic synthetic worked example
 provenance/          workflow registry and SHA-256 artifact manifest
@@ -63,6 +65,8 @@ data/                documented local input layout; large inputs are not tracked
 See the [repository layout](docs/repository_layout.md),
 [workflow index](workflows/README.md), [result dictionary](docs/data_dictionary.md),
 and [reproducibility guide](docs/reproducibility.md).
+For the original analysis code, start with the
+[experiment source index](research_history/EXPERIMENT_INDEX.md).
 
 ## Full environment and data
 
@@ -70,7 +74,10 @@ and [reproducibility guide](docs/reproducibility.md).
 conda env create -f environment.yml
 conda activate tessera-forest-structure
 python -m pip install -e .
+python -m pytest -q
 ```
+
+For a pip-only full test environment, use `python -m pip install -e ".[dev,analysis]"`.
 
 AHN4 products and several mapping layers are public. The Cairngorms LiDAR and
 the experimental Tessera representation used in the local analyses have access

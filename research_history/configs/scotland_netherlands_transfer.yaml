@@ -1,0 +1,62 @@
+phase32_scotland_netherlands_transfer:
+  study:
+    name: Direct Scotland-Netherlands TESSERA v2 transfer
+    interpretation: zero-shot cross-landscape transfer with local spatial-CV references
+    representation: experimental TESSERA v2
+    support_m: 50
+
+  cairngorms:
+    surface_cohort: data/processed/phase22_cairngorms_surface_targets.parquet
+    corrected_cohort: data/processed/phase25_cairngorms_corrected_lidar_targets.parquet
+    features: data/interim/phase32_scotland_netherlands_transfer/cairngorms_v2_summary.npy
+    row_ids: data/interim/phase32_scotland_netherlands_transfer/cairngorms_row_id.npy
+    folds: data/interim/phase22_cairngorms_spatial_unet/folds
+    fold_pattern: balanced_fold_{fold}.npz
+    training_block: spatial_block
+    evaluation_block: spatial_block
+
+  savelsbos:
+    cohort: data/processed/phase26_ahn4_deciduous_cohort.parquet
+    features: data/processed/phase27_savelsbos_tessera_v2.parquet
+    folds: data/interim/phase26_ahn4_folds
+    fold_pattern: fold_{fold}.npz
+    training_block: spatial_block
+    evaluation_block: evaluation_block
+
+  harmonized_targets:
+    mean_height_m:
+      cairngorms: lidar_mean_height_50m
+      savelsbos: ahn4_mean_height_m
+    p95_height_m:
+      cairngorms: lidar_p95_height_50m
+      savelsbos: ahn4_p95_height_m
+    within_cell_height_sd_m:
+      cairngorms: mean_within_cell_height_sd_50m
+      savelsbos: ahn4_height_sd_m
+    height_cv:
+      cairngorms: lidar_height_cv_50m
+      savelsbos: ahn4_height_cv
+
+  features:
+    panels:
+      mean: [mean]
+      context: [mean, std, dx, dy]
+    primary_panel: context
+    channels: 128
+
+  model:
+    type: ridge
+    alpha: 100.0
+    folds: 5
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260818
+
+  outputs:
+    predictions: data/processed/phase32_scotland_netherlands_transfer_predictions.parquet
+    metrics: outputs/tables/phase32_scotland_netherlands_transfer_metrics.csv
+    bootstrap: outputs/tables/phase32_scotland_netherlands_transfer_bootstrap.csv
+    distributions: outputs/tables/phase32_scotland_netherlands_target_distributions.csv
+    figure_scores: outputs/figures/phase32_scotland_netherlands_transfer_scores.pdf
+    figure_scatter: outputs/figures/phase32_scotland_netherlands_transfer_scatter.pdf
+    report: outputs/reports/phase32_scotland_netherlands_transfer.md
+    result_freeze: metadata/phase32_scotland_netherlands_transfer_result_freeze.json

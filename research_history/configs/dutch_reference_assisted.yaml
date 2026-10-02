@@ -1,0 +1,35 @@
+phase38_dutch_reference_assisted:
+  description: >-
+    Reference-assisted transfer using the frozen Phase 37 Dutch cohort and
+    spatial folds. Source forests train the zero-shot model; a small number
+    of labelled target-forest LiDAR units are then used only on the training
+    side of each target fold.
+  inputs:
+    cohort: data/processed/phase37_dutch_expanded_cohort.parquet
+    features: data/processed/phase37_dutch_expanded_tessera_v1.parquet
+    folds: data/interim/phase37_dutch_expanded_folds
+    sites: outputs/tables/phase37_dutch_site_summary.csv
+  evaluation:
+    targets:
+      - ahn4_p95_height_m
+      - ahn4_height_sd_m
+      - ahn4_height_cv
+      - ahn4_entropy
+      - ahn4_pulse_penetration
+      - ahn4_sigma_z
+    fold_count: 5
+    ridge_alpha: 100.0
+    budgets: [0, 5, 25, 100, all]
+    finite_repetitions: 10
+    sampling_seed: 20260912
+    recovery_gate: >-
+      A reference-assisted method passes at a budget when its median RMSE is
+      lower than the target-reference mean baseline and its median R2 is positive.
+  outputs:
+    worker_directory: data/interim/phase38_reference_assisted_workers
+    metrics: outputs/tables/phase38_reference_assisted_fold_metrics.csv
+    summary: outputs/tables/phase38_reference_assisted_summary.csv
+    site_summary: outputs/tables/phase38_reference_assisted_site_summary.csv
+    figures: outputs/figures/phase38_reference_assisted
+    report: outputs/reports/phase38_reference_assisted.md
+    result_freeze: metadata/phase38_reference_assisted_result.json

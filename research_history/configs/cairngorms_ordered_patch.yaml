@@ -1,0 +1,61 @@
+cairngorms_ordered_patch:
+  source:
+    array_directory: data/interim/phase18_cairngorms_neural
+    patch_manifest: metadata/phase18_cairngorms_patch_manifest.json
+    baseline_predictions: data/processed/phase18_cairngorms_oof_predictions.parquet
+    target_table: data/processed/phase17_cairngorms_50m_targets.parquet
+    baseline_metrics: outputs/tables/phase18_cairngorms_pooled_metrics.csv
+    expected_rows: 26455
+    expected_patch_shape: [128, 5, 5]
+
+  evaluation:
+    folds: [0, 1, 2, 3, 4]
+    seeds: [20260731, 20260801, 20260802]
+    target_names:
+      - mean_canopy_shannon_50m
+      - between_cell_height_sd_50m
+      - mean_within_cell_height_sd_50m
+      - mean_gap_fraction_50m
+      - mean_height_50m
+      - mean_p95_height_50m
+      - mean_cover_50m
+      - mean_canopy_shannon_50m_height_adjusted
+    primary_target: mean_canopy_shannon_50m
+    baseline_model: tessera_summary_mlp
+    bootstrap_replicates: 1000
+    bootstrap_seed: 20260731
+
+  models:
+    - ordered_mlp
+    - ordered_skip_mlp
+    - residual_patch_cnn
+
+  neural:
+    batch_size: 256
+    maximum_epochs: 100
+    minimum_epochs: 12
+    early_stopping_patience: 12
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    dropout: 0.10
+    ordered_mlp_hidden: [512, 256, 128]
+    residual_cnn_channels: 96
+    residual_cnn_blocks: 3
+    residual_cnn_head: [256, 128]
+
+  interpretation:
+    desired_primary_r2: 0.70
+    material_rmse_reduction_fraction: 0.05
+    paired_interval_must_exclude_zero: true
+    status: model_development
+
+  jasmin:
+    project_root: /gws/ssde/j25a/forecol/ameer096/tessera-gedi-fhd-ordered-patch
+    account: forecol
+    partition: standard
+    qos: high
+    cpus_per_task: 4
+    memory: 16G
+    wall_time: "12:00:00"
+    array_concurrency: 6
+    python_environment: /home/users/ameer096/venvs/tessera-cairngorms-lotus

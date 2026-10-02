@@ -1,0 +1,86 @@
+phase25_cairngorms_corrected_lidar:
+  study:
+    name: Cairngorms corrected point-cloud structure evaluation
+    lidar_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: "1.0"
+    tessera_dataset_variant: vultr
+    interpretation: frozen correction analysis within the Cairngorms
+
+  frozen_inputs:
+    corrected_lidar_path: data/raw/scotland_lidar/LiDAR_metrics_3.tif
+    corrected_lidar_sha256: a8e588e8c0dc08e4d9a45ff2c22da9cfe333ac71b4bee69d40f217a34f99bfb0
+    previous_lidar_path: data/raw/scotland_lidar/LiDAR_metrics_2.tif
+    previous_lidar_sha256: d9cc95fa0eb0d23a1c6d428120995f64fe4ec41fb97ebda4c1c3d7439a1f47fe
+    cohort_path: data/processed/phase22_cairngorms_surface_targets.parquet
+    source_fold_directory: data/interim/phase22_cairngorms_spatial_unet/folds
+    source_spatial_block_path: data/interim/phase22_cairngorms_spatial_unet/spatial_block.npy
+    tessera_source_path: data/interim/phase18_cairngorms_neural/summary.npy
+    tessera_row_id_path: data/interim/phase18_cairngorms_neural/row_id.npy
+    conventional_source_path: data/interim/phase19_cairngorms_arrays/conventional_5.npy
+    conventional_row_id_path: data/interim/phase19_cairngorms_arrays/row_id.npy
+    tessera_features_path: data/interim/phase25_cairngorms_corrected_lidar/tessera.npy
+    conventional_features_path: data/interim/phase25_cairngorms_corrected_lidar/conventional.npy
+
+  targets:
+    source_bands:
+      lidar_mean_height_50m: lidar_meanH
+      lidar_p95_height_50m: lidar_p_95
+      lidar_height_cv_50m: lidar_height_cv
+      lidar_rcv_50m: lidar_rcv
+      lidar_rms_50m: lidar_rms
+      lidar_canopy_shannon_50m: lidar_canopy_shannon
+    primary:
+      - lidar_height_cv_50m
+      - lidar_rcv_50m
+      - lidar_rms_50m
+      - lidar_canopy_shannon_50m
+    height_predictors:
+      - lidar_mean_height_50m
+      - lidar_p95_height_50m
+    adjusted_suffix: _height_adjusted
+    spline_knots: 5
+    ridge_alpha: 10.0
+    minimum_valid_10m_cells: 24
+
+  quality_control:
+    lidar_height_cv_50m: [0.0, 5.0]
+    lidar_rcv_50m: [0.0, 10.0]
+    lidar_rms_50m: [0.0, 60.0]
+    lidar_canopy_shannon_50m: [0.0, 1.61]
+    minimum_test_rows: 500
+
+  evaluation:
+    folds: 5
+    models: [conventional, tessera, fused]
+    seeds: [20260804, 20260805, 20260806]
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260810
+    comparisons:
+      - [tessera, conventional]
+      - [fused, tessera]
+      - [fused, conventional]
+
+  neural:
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 512
+    maximum_epochs: 100
+    minimum_epochs: 12
+    early_stopping_patience: 12
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  outputs:
+    array_directory: data/interim/phase25_cairngorms_corrected_lidar
+    result_directory: data/interim/phase25_cairngorms_corrected_lidar_results
+    target_table: data/processed/phase25_cairngorms_corrected_lidar_targets.parquet
+    prediction_table: data/processed/phase25_cairngorms_corrected_lidar_predictions.parquet
+    preparation_status: metadata/phase25_cairngorms_corrected_lidar_preparation.json
+    fold_metrics_table: outputs/tables/phase25_cairngorms_corrected_lidar_metrics.csv
+    macro_table: outputs/tables/phase25_cairngorms_corrected_lidar_macro.csv
+    bootstrap_table: outputs/tables/phase25_cairngorms_corrected_lidar_bootstrap.csv
+    figure: outputs/figures/phase25_cairngorms_corrected_lidar.png
+    report: outputs/reports/phase25_cairngorms_corrected_lidar.md
+    input_freeze: metadata/phase25_cairngorms_corrected_lidar_input_freeze.json
+    result_freeze: metadata/phase25_cairngorms_corrected_lidar_result_freeze.json

@@ -1,0 +1,68 @@
+phase33_cairngorms_flip_augmentation:
+  study:
+    name: Cairngorms TESSERA v2 reflection-augmentation sensitivity
+    interpretation: matched comparison with the frozen Phase 29 summary MLP
+
+  frozen_inputs:
+    phase29_config: configs/cairngorms_v2_surface.yaml
+    phase29_result_freeze: metadata/phase29_cairngorms_v2_surface_result_freeze.json
+    raw_array_directory: data/interim/phase29_cairngorms_v2_surface_raw
+    adjusted_array_directory: data/interim/phase29_cairngorms_v2_surface_adjusted
+    raw_baseline_results: data/interim/phase29_cairngorms_v2_surface_raw_results
+    adjusted_baseline_results: data/interim/phase29_cairngorms_v2_surface_adjusted_results
+
+  representation:
+    channels: 128
+    summary_order: [centre, mean, standard_deviation, east_west_gradient, north_south_gradient]
+    augmentation:
+      training: independent_random_horizontal_and_vertical_reflections_per_row_per_epoch
+      validation_and_test: mean_of_original_horizontal_vertical_and_both_reflections
+      horizontal_effect: reverse_east_west_gradient
+      vertical_effect: reverse_north_south_gradient
+      shifts_enabled: false
+
+  targets:
+    raw:
+      - canopy_p95_height_m
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+      - canopy_height_kurtosis
+    height_adjusted:
+      - canopy_surface_sd_m
+      - canopy_surface_cv
+      - canopy_surface_rcv
+      - canopy_rumple
+      - canopy_open_fraction
+      - canopy_height_kurtosis
+
+  evaluation:
+    variants: [raw, height_adjusted]
+    folds: 5
+    seeds: [20260804, 20260805, 20260806]
+    bootstrap_replicates: 2000
+    bootstrap_seed: 20260819
+    comparison: flip_augmented_minus_unaugmented
+
+  model:
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 1024
+    maximum_epochs: 80
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  outputs:
+    result_directory: data/interim/phase33_cairngorms_flip_augmentation_results
+    predictions: data/processed/phase33_cairngorms_flip_augmentation_predictions.parquet
+    fold_metrics: outputs/tables/phase33_cairngorms_flip_augmentation_fold_metrics.csv
+    macro_metrics: outputs/tables/phase33_cairngorms_flip_augmentation_macro.csv
+    comparison: outputs/tables/phase33_cairngorms_flip_augmentation_comparison.csv
+    figure: outputs/figures/phase33_cairngorms_flip_augmentation.pdf
+    report: outputs/reports/phase33_cairngorms_flip_augmentation.md
+    result_freeze: metadata/phase33_cairngorms_flip_augmentation_result_freeze.json
+

@@ -1,0 +1,91 @@
+phase14_scotland_lidar:
+  source:
+    path: data/raw/scotland_lidar/LiDAR_metrics_2.tif
+    survey_name: Cairngorms Connect airborne LiDAR survey
+    survey_year: 2023
+    source_crs_override: EPSG:27700
+    expected_bounds_bng: [267460.0, 782910.0, 308170.0, 823570.0]
+    expected_resolution_m: 10.0
+    expected_band_count: 39
+
+  sampling:
+    maximum_rows: 200000
+    seed: 20260727
+    raster_chunk_rows: 256
+    forest_mask:
+      minimum_p95_height_m: 3.0
+      maximum_p999_height_m: 60.0
+      maximum_return_height_m: 60.0
+      minimum_canopy_cover: 0.10
+      maximum_canopy_cover: 1.0
+      maximum_canopy_shannon: 1.61
+
+  tessera:
+    embedding_year: 2023
+    dataset_version: "1.0"
+    dataset_variant: vultr
+    minimum_valid_alignment_fraction: 0.95
+    download_attempts: 6
+    retry_delay_seconds: 20
+
+  spatial_evaluation:
+    region_count: 5
+    region_seed: 20260727
+    block_size_m: 1000
+    exclusion_buffer_m: 1000
+    minimum_test_rows_per_target: 1000
+    minimum_training_rows_per_target: 5000
+
+  models:
+    ridge_alpha: 100.0
+    coordinate_polynomial_degree: 2
+    nonlinear:
+      learning_rate: 0.05
+      max_iter: 120
+      max_leaf_nodes: 31
+      min_samples_leaf: 100
+      l2_regularization: 10.0
+      random_state: 20260727
+
+  targets:
+    primary: lidar_canopy_shannon
+    representative:
+      - lidar_canopy_shannon
+      - lidar_vci_2m
+      - lidar_vci_5m
+      - lidar_vci_10m
+      - lidar_vci_15m
+      - lidar_Cov
+      - lidar_gapFrac
+      - lidar_ePAI
+      - lidar_Tvolume
+      - lidar_meanH
+      - lidar_maxH
+      - lidar_stdH
+    nonlinear:
+      - lidar_canopy_shannon
+      - lidar_vci_2m
+      - lidar_Cov
+      - lidar_meanH
+    height_adjustment_predictors:
+      - lidar_meanH
+      - lidar_maxH
+      - lidar_p_95
+      - lidar_stdH
+    valid_ranges:
+      lidar_canopy_shannon: [0.0, 1.61]
+      lidar_vci_2m: [0.0, 1.0]
+      lidar_vci_5m: [0.0, 1.0]
+      lidar_vci_10m: [0.0, 1.0]
+      lidar_vci_15m: [0.0, 1.0]
+      lidar_Cov: [0.0, 1.0]
+      lidar_gapFrac: [0.0, 1.0]
+      lidar_ePAI: [0.0, 20.0]
+      lidar_Tvolume: [0.0, 1000.0]
+      lidar_meanH: [1.3, 60.0]
+      lidar_maxH: [3.0, 60.0]
+      lidar_stdH: [0.0, 30.0]
+
+  uncertainty:
+    block_bootstrap_replicates: 2000
+    seed: 20260727

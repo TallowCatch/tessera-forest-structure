@@ -1,0 +1,34 @@
+phase24_cairngorms_height_diagnostic:
+  study:
+    name: Cairngorms canopy-height diagnostic
+    lidar_year: 2023
+    tessera_year: 2023
+    tessera_dataset_version: "1.0"
+    tessera_dataset_variant: vultr
+    scope: within-landscape spatial generalisation
+
+  inputs:
+    broad_10m_sample: data/processed/phase14_scotland_lidar_sample.parquet
+    mature_50m_targets: data/processed/phase22_cairngorms_surface_targets.parquet
+    phase22_predictions: data/processed/phase22_cairngorms_spatial_unet_predictions.parquet
+    tessera_row_ids: data/interim/phase18_cairngorms_neural/row_id.npy
+    tessera_summary: data/interim/phase18_cairngorms_neural/summary.npy
+    fold_directory: data/interim/phase22_cairngorms_spatial_unet/folds
+
+  evaluation:
+    scheme: balanced
+    folds: 5
+    primary_model: tessera_mlp_5x5
+    random_seed: 20260805
+    ridge_alphas: [0.01, 0.0316228, 0.1, 0.316228, 1.0, 3.16228, 10.0, 31.6228, 100.0, 316.228, 1000.0, 3162.28, 10000.0]
+    height_targets:
+      - canopy_mean_height_m
+      - canopy_p95_height_m
+      - mean_height_50m
+      - mean_p95_height_50m
+
+  outputs:
+    directory: outputs/phase24_cairngorms_height_diagnostic
+    figure: outputs/figures/phase24_cairngorms_height_diagnostic.png
+    report: outputs/reports/phase24_cairngorms_height_diagnostic.md
+    freeze: metadata/phase24_cairngorms_height_diagnostic.json

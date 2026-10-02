@@ -1,0 +1,96 @@
+phase20_cairngorms_components:
+  study:
+    name: Cairngorms component-resolved canopy heterogeneity
+    landscape: Cairngorms Connect
+    lidar_survey_year: 2023
+    tessera_year: 2023
+    analysis_crs: EPSG:27700
+    interpretation: retrospective method-development experiment
+
+  downloads:
+    chm_1m:
+      url: https://2019.filemail.com/api/file/get?filekey=OvU1Vhhj6mbBvDAiYCcgVUk-EdefSkeQPXcuilZTbGZBa6W8rKgzoV2sJFWWxSUHuypex9XxxeoV2uyC-SzMpBXSIWI-icNXxyv27w
+      path: data/raw/scotland_lidar/chm/Cairngorms_standard_CHM_DSM_DTM_1m_res.tif
+      expected_bytes: 6007617253
+    chm_metrics_50m:
+      url: https://2118.filemail.com/api/file/get?filekey=uqMYD_rcdyLRK7EvzB_5ORvHe8qz6h8Ebrsx2GkrI0YNw5mEWdUOgSl4R8mCJpXcftHFGl9qdhmqyZ8VLOKB9g
+      path: data/raw/scotland_lidar/chm/CHM_canopy_metrics_50m_new.tif
+      expected_bytes: 9934607
+    slope_mask:
+      url: https://2109.filemail.com/api/file/get?filekey=Yba2GU1uhzGRBwtqC95YgY8uqJ2GJlVruL_Cphj4H1B7eaP8173g9wbkFguklT3yZx0oCkZGnxTRhvCSQpbajjk
+      path: data/raw/scotland_lidar/chm/Cairngorms_slope_mask_45_1m.tif
+      expected_bytes: 101932911
+    slope_of_slope_mask:
+      url: https://2109.filemail.com/api/file/get?filekey=E6WMNE85jrJ0sOGRBWt1P2xy1dffxqFC8DH23tkzyMAhuZCo3---PWVX0l394RuPshKru1-o2TRng_fy19hBA0YzFjvu82ChLeQ2Tw
+      path: data/raw/scotland_lidar/chm/Cairngorms_slope_of_slope_mask_84_5_1m.tif
+      expected_bytes: 114554275
+
+  frozen_inputs:
+    cohort_path: data/processed/phase17_cairngorms_50m_targets.parquet
+    cohort_sha256: 7ea4925c30ddff2445289bf2d0b892e1c146e43eeb639ca5783d34c317256b72
+    lidar_metrics_path: data/raw/scotland_lidar/LiDAR_metrics_2.tif
+    lidar_metrics_sha256: d9cc95fa0eb0d23a1c6d428120995f64fe4ec41fb97ebda4c1c3d7439a1f47fe
+    tessera_features_path: data/interim/phase18_cairngorms_neural/summary.npy
+    tessera_features_sha256: bfcf6655a68186f70e0b9a92e54990242f8374960a336aebd66bb8f72bb19cc5
+    conventional_features_path: data/interim/phase19_cairngorms_arrays/conventional_5.npy
+    conventional_features_sha256: 490f8b2ee7487161053d53ea465ddf2ec6030670cf11257f93c8e33d55d14d34
+    row_id_path: data/interim/phase19_cairngorms_arrays/row_id.npy
+    row_id_sha256: caffc545d63074ec56c98152ea0f9dccb2ca0c109a88017720dae8cff5c0af46
+    common_valid_path: data/interim/phase19_cairngorms_arrays/common_valid.npy
+    common_valid_sha256: 79129b5aef93a26a42b8fb3afacd67cee754d705506eead36145fff40d4f2d24
+    fold_directory: data/interim/phase19_cairngorms_arrays
+
+  targets:
+    primary:
+      - canopy_surface_sd_m
+      - canopy_surface_rcv
+      - canopy_open_fraction
+      - mean_local_vci_2m
+    supplied_50m_comparison:
+      canopy_surface_sd_m: chm_sdH
+      canopy_surface_rcv: chm_rcv
+      canopy_open_fraction: chm_gapFrac
+    height_adjustment_predictors:
+      - mean_height_50m
+      - mean_p95_height_50m
+    spline_knots: 5
+    ridge_alpha: 10.0
+    canopy_open_height_m: 2.0
+    minimum_valid_chm_pixels: 2000
+
+  quality_control:
+    mask_nonzero_means_valid: true
+    maximum_flagged_fraction: 0.0
+    sensitivity_thresholds: [0.0, 0.01, 0.05]
+    maximum_chm_height_m: 60.0
+    maximum_surface_sd_m: 25.0
+    maximum_surface_rcv: 5.0
+    minimum_test_rows_per_fold: 500
+    minimum_supplied_recomputed_spearman: 0.90
+
+  evaluation:
+    folds: 5
+    seeds: [20260801, 20260802, 20260803]
+    block_size_m: 1000
+    bootstrap_replicates: 1000
+    bootstrap_seed: 20260801
+    models: [conventional, tessera, fused]
+    comparisons:
+      - [tessera, conventional]
+      - [fused, conventional]
+
+  neural:
+    hidden_dimensions: [256, 128]
+    dropout: 0.10
+    batch_size: 512
+    maximum_epochs: 100
+    minimum_epochs: 12
+    early_stopping_patience: 12
+    learning_rate: 0.001
+    weight_decay: 0.0001
+
+  interpretation_gates:
+    minimum_folds_with_positive_r2: 4
+    paired_interval_must_exclude_zero: true
+    vertical_claim_target: mean_local_vci_2m_height_adjusted
+    rule: A vertical-complexity claim requires repeatable height-adjusted VCI skill; otherwise describe the result as canopy-surface and opening structure.

@@ -1,0 +1,114 @@
+cairngorms_dense_profile:
+  study:
+    name: Cairngorms direct vertical-profile prediction
+    landscape: Cairngorms Connect
+    survey_year: 2023
+    analysis_crs: EPSG:27700
+    interpretation: retrospective method-development experiment
+
+  source:
+    lidar_metrics_path: data/raw/scotland_lidar/LiDAR_metrics_2.tif
+    expected_source_sha256: d9cc95fa0eb0d23a1c6d428120995f64fe4ec41fb97ebda4c1c3d7439a1f47fe
+    dense_directory: data/interim/cairngorms_dense_10m
+    dense_manifest: data/interim/cairngorms_dense_10m/manifest.json
+    dense_result_directory: data/interim/cairngorms_dense_10m_results
+    dense_prediction_table: data/processed/cairngorms_dense_10m_oof_predictions.parquet
+    expected_dense_rows: 660453
+
+  profile:
+    source_bands:
+      - lidar_vlayer_L1
+      - lidar_vlayer_L2
+      - lidar_vlayer_L3
+    layer_labels:
+      - 0_to_1m
+      - 1_to_10m
+      - above_10m
+    structural_window_cells: 5
+    structural_support_m: 50
+    output_stride_m: 10
+    minimum_total_volume: 0.000001
+    entropy_consistency_tolerance: 0.000005
+    covariate_bands:
+      mean_canopy_height_m: lidar_meanH
+      canopy_cover: lidar_Cov
+      gap_fraction: lidar_gapFrac
+    height_strata_m:
+      - [10.0, 15.0]
+      - [15.0, 20.0]
+      - [20.0, 45.000001]
+    height_stratum_labels:
+      - 10_to_15m
+      - 15_to_20m
+      - above_20m
+
+  spatial_evaluation:
+    region_count: 5
+    block_size_m: 1000
+    exclusion_buffer_m: 1000
+    equal_block_weight: true
+    reuse_frozen_dense_folds: true
+
+  models:
+    names:
+      - summary_mlp
+      - residual_patch_cnn
+      - compact_unet
+    seeds: [20260801, 20260802, 20260803]
+    batch_size:
+      summary_mlp: 4096
+      residual_patch_cnn: 1024
+      compact_unet: 2
+    maximum_epochs:
+      summary_mlp: 60
+      residual_patch_cnn: 60
+      compact_unet: 50
+    minimum_epochs: 10
+    early_stopping_patience: 8
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    dropout: 0.10
+    summary_hidden_dimensions: [256, 128]
+    residual_cnn_channels: 96
+    residual_cnn_blocks: 3
+    residual_cnn_head: [256, 128]
+    unet_base_channels: 24
+    unet_chip_cells: 128
+    unet_chip_stride_cells: 96
+    unet_minimum_training_targets_per_chip: 128
+    loss:
+      name: jensen_shannon_plus_mse
+      jensen_shannon_weight: 1.0
+      proportion_mse_weight: 0.25
+      numerical_epsilon: 0.0000001
+
+  diagnostic_baselines:
+    names:
+      - training_profile_mean
+      - lidar_height_only_ridge
+      - lidar_height_cover_gap_ridge
+    ridge_alpha: 1.0
+    note: LiDAR covariates are reference-derived diagnostics and are not deployable remote-sensing predictors.
+
+  uncertainty:
+    block_bootstrap_replicates: 1000
+    seed: 20260801
+
+  selection:
+    primary_metric: mean_jensen_shannon_distance
+    minimum_material_reduction_fraction: 0.05
+    paired_interval_must_exclude_zero: true
+
+  outputs:
+    profile_directory: data/interim/cairngorms_dense_profile
+    result_directory: data/interim/cairngorms_dense_profile_results
+    prediction_table: data/processed/cairngorms_dense_profile_oof_predictions.parquet
+    metrics_table: outputs/tables/cairngorms_dense_profile_metrics.csv
+    pooled_metrics_table: outputs/tables/cairngorms_dense_profile_pooled_metrics.csv
+    height_strata_table: outputs/tables/cairngorms_dense_profile_height_strata.csv
+    comparisons_table: outputs/tables/cairngorms_dense_profile_comparisons.csv
+    entropy_comparison_table: outputs/tables/cairngorms_dense_profile_entropy_comparison.csv
+    map_directory: outputs/maps/cairngorms_dense_profile
+    preparation_status: metadata/cairngorms_dense_profile_preparation_status.json
+    input_freeze: metadata/cairngorms_dense_profile_input_freeze.json
+    result_freeze: metadata/cairngorms_dense_profile_result_freeze.json
